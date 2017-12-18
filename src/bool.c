@@ -1,6 +1,6 @@
-#include <stdio.h> // printf
-
 #include "bool.h"
+
+#include <stdio.h>
 
 
 void bool_print(bool b) {

@@ -96,7 +96,7 @@ Wire.prototype.draw = function(circuitElem) {
 
 
 Wire.prototype.destroy = function() {
-  if (this.wireElem) this.elem.parentNode.removeChild(this.wireElem);
+  if (this.wireElem) this.wireElem.parentNode.removeChild(this.wireElem);
 
   // Remove from global wires list
   let uuid = this.uuid;

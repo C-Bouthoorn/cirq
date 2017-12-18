@@ -7,6 +7,10 @@ CC = clang
 # Flags for Clang
 CFLAGS = -O0 -g -Weverything
 
+# Disable annoying warnings
+ANNOYING_WARNINGS = padded gnu-zero-variadic-macro-arguments variadic-macros
+CFLAGS += $(ANNOYING_WARNINGS:%=-Wno-%)
+
 # Flags for GCC
 GCC_FLAGS = -O0 -g -Wall -Wextra
 

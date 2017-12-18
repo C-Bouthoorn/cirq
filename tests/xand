@@ -1,0 +1,20 @@
+xand
+
+[gates] 7
+f90570c2 IN
+064b5ae8 IN
+a8d21448 AND
+2d1c3b0c OUT
+db083bcc NOT
+d1626cd1 OR
+6b3967af OR
+
+[wires] 8
+f90570c2:O0 a8d21448:I0
+064b5ae8:O0 a8d21448:I1
+f90570c2:O0 d1626cd1:I0
+064b5ae8:O0 d1626cd1:I1
+d1626cd1:O0 db083bcc:I0
+a8d21448:O0 6b3967af:I0
+db083bcc:O0 6b3967af:I1
+6b3967af:O0 2d1c3b0c:I0

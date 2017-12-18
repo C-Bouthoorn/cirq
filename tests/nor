@@ -1,0 +1,14 @@
+nor
+
+[gates] 5
+832532c7 IN
+a0e3e448 OR
+1c774a1e NOT
+26cbc7d3 OUT
+eb2ff896 IN
+
+[wires] 4
+832532c7:O0 a0e3e448:I0
+eb2ff896:O0 a0e3e448:I1
+a0e3e448:O0 1c774a1e:I0
+1c774a1e:O0 26cbc7d3:I0

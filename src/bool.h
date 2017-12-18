@@ -7,4 +7,5 @@
 
 void bool_print(bool b);
 
+
 #endif

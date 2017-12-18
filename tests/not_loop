@@ -1,0 +1,11 @@
+NOT_LOOP
+
+[gates] 3
+6eccf69a NOT
+5cdb9515 IN
+18c1d48d OUT
+
+[wires] 3
+5cdb9515:O0 6eccf69a:I0
+6eccf69a:O0 18c1d48d:I0
+6eccf69a:I0 6eccf69a:O0

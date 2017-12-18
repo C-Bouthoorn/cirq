@@ -1,0 +1,21 @@
+full_adder
+
+[gates] 8
+0e36e9ea IN #I0
+63f0d9e3 IN #I1
+b9f8820d IN #Ci
+2c9ced3a OUT #S
+57f26486 OUT #Co
+e16e5e97 OR
+3752723b half_adder
+45243a79 half_adder
+
+[wires] 8
+0e36e9ea:I0 3752723b:I1
+63f0d9e3:I1 3752723b:I0
+3752723b:S 45243a79:I0
+b9f8820d:Ci 45243a79:I1
+45243a79:S 2c9ced3a:S
+3752723b:C e16e5e97:I0
+45243a79:C e16e5e97:I1
+e16e5e97:O0 57f26486:Co

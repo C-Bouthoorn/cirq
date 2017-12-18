@@ -12,7 +12,7 @@ function Port(gate, name, width) {
   this.uuid = gate.uuid + ':' + name;
   this.type = (name.charAt(0) == 'I' ? 'IN' : 'OUT');
 
-  this.id = parseInt(name.substring(1));
+  this.id = parseInt(name.substring(1)) + (this.type == 'OUT' ? gate.in : 0);
 
   this.width = width;
 

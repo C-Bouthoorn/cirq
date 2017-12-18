@@ -29,7 +29,7 @@ function Gate(type, _in, _out) {
   // Add out-ports
   for (let i=0; i < _out; i++) {
     // Default name
-    let name = 'O' + (i + _in);
+    let name = 'O' + i;
     this.ports[name] = new Port(this, name, this.PORT_WIDTH);
   }
 
