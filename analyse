@@ -1,0 +1,54 @@
+	[ 0e36e9ea {IN}  ] 	    :I0 (false)	 --> 3752723b {half_adder}:I0
+	[ 63f0d9e3 {IN}  ] 	    :I1 (true)	 --> 3752723b {half_adder}:I1
+	[ b9f8820d {IN}  ] 	    :Ci (false)	 --> 45243a79 {half_adder}:I1
+	[ 2c9ced3a {OUT} ] 	    :S (false)	 <-- 45243a79 {half_adder}:S
+	[ 57f26486 {OUT} ] 	    :Co (false)	 <-- e16e5e97 {OR}:O0
+
+	[ 3752723b {half_adder} ]
+		    :I0 (false)	 <-> 18286b9b {XOR}:I1, f66e7062 {AND}:I0, 0e36e9ea {IN}:I0
+		    :I1 (false)	 <-> 18286b9b {XOR}:I0, f66e7062 {AND}:I1, 63f0d9e3 {IN}:I1
+		    :S (false)	 <-> 18286b9b {XOR}:O0, 45243a79 {half_adder}:I0
+		    :C (false)	 <-> f66e7062 {AND}:O0, e16e5e97 {OR}:I0
+
+		[ a5987c34 {IN}  ]	:I0 (false)	 --> 18286b9b {XOR}:I1, f66e7062 {AND}:I0
+		[ 03808f52 {IN}  ]	:I1 (false)	 --> 18286b9b {XOR}:I0, f66e7062 {AND}:I1
+		[ 382da1d0 {OUT} ]	:S (false)	 <-- 18286b9b {XOR}:O0
+		[ 811b6b1b {OUT} ]	:C (false)	 <-- f66e7062 {AND}:O0
+
+		[ 18286b9b {XOR} ]
+			    :I0 (false)	 <-- 03808f52 {IN}:I1
+			    :I1 (false)	 <-- a5987c34 {IN}:I0
+			    :O0 (false)	 --> 382da1d0 {OUT}:S
+
+		[ f66e7062 {AND} ]
+			    :I0 (false)	 <-- a5987c34 {IN}:I0
+			    :I1 (false)	 <-- 03808f52 {IN}:I1
+			    :O0 (false)	 --> 811b6b1b {OUT}:C
+
+
+	[ 45243a79 {half_adder} ]
+		    :I0 (false)	 <-> 18286b9b {XOR}:I1, f66e7062 {AND}:I0, 3752723b {half_adder}:S
+		    :I1 (false)	 <-> 18286b9b {XOR}:I0, f66e7062 {AND}:I1, b9f8820d {IN}:Ci
+		    :S (false)	 <-> 18286b9b {XOR}:O0, 2c9ced3a {OUT}:S
+		    :C (false)	 <-> f66e7062 {AND}:O0, e16e5e97 {OR}:I1
+
+		[ a5987c34 {IN}  ]	:I0 (false)	 --> 18286b9b {XOR}:I1, f66e7062 {AND}:I0
+		[ 03808f52 {IN}  ]	:I1 (false)	 --> 18286b9b {XOR}:I0, f66e7062 {AND}:I1
+		[ 382da1d0 {OUT} ]	:S (false)	 <-- 18286b9b {XOR}:O0
+		[ 811b6b1b {OUT} ]	:C (false)	 <-- f66e7062 {AND}:O0
+
+		[ 18286b9b {XOR} ]
+			    :I0 (false)	 <-- 03808f52 {IN}:I1
+			    :I1 (false)	 <-- a5987c34 {IN}:I0
+			    :O0 (false)	 --> 382da1d0 {OUT}:S
+
+		[ f66e7062 {AND} ]
+			    :I0 (false)	 <-- a5987c34 {IN}:I0
+			    :I1 (false)	 <-- 03808f52 {IN}:I1
+			    :O0 (false)	 --> 811b6b1b {OUT}:C
+
+	[ e16e5e97 {OR} ]
+		    :I0 (false)	 <-- 3752723b {half_adder}:C
+		    :I1 (false)	 <-- 45243a79 {half_adder}:C
+		    :O0 (false)	 --> 57f26486 {OUT}:Co
+

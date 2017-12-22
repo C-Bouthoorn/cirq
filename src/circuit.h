@@ -4,11 +4,12 @@
 
 #include "wire.h"
 #include "gate.h"
+#include "hex_hashmap.h"
 
 
 typedef struct circuit {
-  char *name;
-  vector_t gates;
+	char *name;
+	hex_hashmap_t gates;
 } circuit_t;
 
 
@@ -19,7 +20,8 @@ port_t *circuit_get_port_by_name(circuit_t *circ, char *gatename, char *portname
 port_t *circuit_get_io_port_by_name(circuit_t *circ, char *portname);
 
 
-void circuit_print(circuit_t *circ);
+circuit_t *circuit_copy(circuit_t *src);
+void circuit_print(circuit_t *circ, unsigned int depth);
 void circuit_init(circuit_t *circ);
 void circuit_free(circuit_t *circ);
 

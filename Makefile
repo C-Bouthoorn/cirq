@@ -8,8 +8,8 @@ CC = clang
 CFLAGS = -O0 -g -Weverything
 
 # Disable annoying warnings
-ANNOYING_WARNINGS = padded gnu-zero-variadic-macro-arguments variadic-macros
-CFLAGS += $(ANNOYING_WARNINGS:%=-Wno-%)
+ANNOYING_WARNINGS = padded variadic-macros gnu-zero-variadic-macro-arguments
+IGNORE_FLAGS = $(ANNOYING_WARNINGS:%=-Wno-%)
 
 # Flags for GCC
 GCC_FLAGS = -O0 -g -Wall -Wextra
@@ -17,9 +17,30 @@ GCC_FLAGS = -O0 -g -Wall -Wextra
 # Default valgrind flags
 VALGRIND_FLAGS = --leak-check=full --show-leak-kinds=all -v
 
+# Colors
+RED := $(shell echo -ne "\e[0;31m")
+LIGHT_RED := $(shell echo -ne "\e[0;91m")
+GREEN := $(shell echo -ne "\e[0;32m")
+LIGHT_GREEN := $(shell echo -ne "\e[0;92m")
+YELLOW := $(shell echo -ne "\e[0;33m")
+LIGHT_YELLOW := $(shell echo -ne "\e[0;93m")
+BLUE := $(shell echo -ne "\e[0;34m")
+LIGHT_BLUE := $(shell echo -ne "\e[0;94m")
+MAGENTA := $(shell echo -ne "\e[0;35m")
+LIGHT_MAGENTA := $(shell echo -ne "\e[0;95m")
+CYAN := $(shell echo -ne "\e[0;36m")
+LIGHT_CYAN := $(shell echo -ne "\e[0;96m")
+
+WHITE := $(shell echo -ne "\e[0;97m")
+LIGHT_GRAY := $(shell echo -ne "\e[0;37m")
+DARK_GRAY := $(shell echo -ne "\e[0;90m")
+BLACK := $(shell echo -ne "\e[0;30m")
+RESET := $(shell echo -ne "\e[0m")
+
+TAB := $(shell echo -ne "\t")
 
 # All targets that are not files
-.PHONY: all gcc shit asan help run valgrind clean remake cleanrun
+.PHONY: help asan all shit bench bench_build valgrind valshit run clean remake cleanrun
 
 
 # Show some help
@@ -27,6 +48,7 @@ help:
 	@echo -e "make help      show this help"
 	@echo -e "make all       build all files with ASAN on clang"
 	@echo -e "make shit      build all files with ASAN on gcc"
+	@echo -e "make bench     build all files with ASAN on clang with benchmarking on"
 	@echo -e "make valgrind  build all files (clang), then run with valgrind"
 	@echo -e "make valshit   build all files (gcc), then run with valgrind"
 	@echo -e "make run       just run the executable"
@@ -50,9 +72,16 @@ shit: CFLAGS = $(GCC_FLAGS)
 shit: asan
 
 
-# Just run the executable
-run:
-	$(OUTPUT_EXEC)
+bench_build: CFLAGS = -O3 -DBENCH
+bench_build: cleanrun
+
+bench:
+	@rm -f /tmp/bench
+	@touch /tmp/bench
+	@make --no-print-directory bench_build
+	@rm -f /tmp/bench.tmp
+	@sort -n /tmp/bench
+	@rm -f /tmp/bench
 
 
 # Enable and run valgrind
@@ -67,9 +96,16 @@ valshit: CC = gcc
 valshit: CFLAGS = $(GCC_FLAGS)
 valshit: valgrind
 
+
+# Just run the executable
+run:
+	$(OUTPUT_EXEC)
+
+
 # Clean all build files
 clean:
-	rm -f $(OUTPUT_EXEC) build/*
+	@echo "${RED}rm -f $(OUTPUT_EXEC) build/*${RESET}"
+	@rm -f $(OUTPUT_EXEC) build/*
 
 
 # Remove all files, then build again
@@ -82,15 +118,25 @@ cleanrun: remake
 	$(OUTPUT_EXEC)
 
 
-# Build all dependencies
-
 # Find all C files
 DEPS = $(shell find src -name '*.c')
-# Change src/ to build/ and .c to .o
+
+# Change src/%.c to build/%.o
 DEPS_O = $(DEPS:src/%.c=build/%.o)
 
-$(OUTPUT_EXEC): $(DEPS_O)
-	$(CC)  $(CFLAGS)	$(DEPS_O)	-o $(OUTPUT_EXEC)
 
+# Build dependencies
 $(DEPS_O): build/%.o: src/%.c
-	$(CC)  $(CFLAGS)	-c $<	-o $@
+	@echo "$(CC)${TAB}${YELLOW}$(CFLAGS) ${DARK_GRAY}$(IGNORE_FLAGS)"
+	@echo "${TAB}${LIGHT_CYAN}-c" $< "${TAB}${LIGHT_GREEN}-o" $@
+	@echo "${RESET}"
+	@$(CC)  $(CFLAGS) $(IGNORE_FLAGS) -c $< -o $@
+
+
+# Build main executable
+$(OUTPUT_EXEC): $(DEPS_O)
+	@echo "$(CC)${TAB}${YELLOW}$(CFLAGS) ${DARK_GRAY}$(IGNORE_FLAGS)"
+	@echo "${TAB}${LIGHT_GREEN}$(DEPS_O)"
+	@echo "${TAB}${LIGHT_MAGENTA}-o $(OUTPUT_EXEC)"
+	@echo "${RESET}"
+	@$(CC)  $(CFLAGS) $(IGNORE_FLAGS) $(DEPS_O) -o $(OUTPUT_EXEC)

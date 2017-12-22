@@ -3,80 +3,128 @@
 #include "bool.h"
 #include "gate.h"
 #include "assert.h"
+#include "benchmark.h"
 
 
 bool port_update_state(port_t *port) {
-  assert_neq(port, NULL);
+	FUNC_START();
 
-  bool success = true;
+	assert_not_null(port);
 
-  if (port->type == PortType_INPUT) {
-    success = gate_update_state(port->gate);
-  }
-  else {
-    // If port is an output, copy state to other inputs
-    VEC_EACH(port->connections, port_t *connection) {
-      if (connection->type == PortType_INPUT) {
-        connection->state = port->state;
+	bool success = true;
 
-        success &= port_update_state(connection);
-      }
-    }
-  }
+	if (port->type == PortType_INPUT) {
+		// Input ports should update the gate they are attached to
+		FUNC_PAUSE();
+		success &= gate_update_state(port->gate);
+		FUNC_RESUME();
+	}
 
-  return success;
+	else if (port->type == PortType_OUTPUT || port->type == PortType_NODE) {
+		// Outputs and nodes should copy their state to their connected inputs and nodes
+		VEC_EACH(port->connections, port_t *connection) {
+			// Filter on inputs and nodes
+			if (connection->type != PortType_INPUT && connection->type != PortType_NODE) {
+				continue;
+			}
+
+			FUNC_PAUSE();
+			success &= port_set_state(connection, port->state);
+			FUNC_RESUME();
+		}
+	}
+
+	FUNC_END();
+	return success;
 }
 
 
 bool port_set_state(port_t *port, bool state) {
-  port->state = state;
-  return port_update_state(port);
+	FUNC_START();
+
+	// Check if state already matches
+	if (port->state == state) {
+		// Don't change anything
+		FUNC_END();
+		return true;
+	}
+
+	port->state = state;
+
+	FUNC_PAUSE();
+	bool success = port_update_state(port);
+	FUNC_RESUME();
+
+	FUNC_END();
+	return success;
 }
 
 
-bool port_get_state(port_t *port) {
-  return port->state;
+port_t *port_copy(port_t *src) {
+	FUNC_START();
+	assert_not_null(src);
+
+	port_t *dest = malloc(sizeof(port_t));
+	port_init(dest);
+
+	dest->name = malloc(strlen(src->name) + 1);
+	strcpy(dest->name, src->name);
+
+	dest->state = src->state;
+	dest->type = src->type;
+
+	FUNC_END();
+	return dest;
 }
 
 
 void port_print(port_t *port) {
-  printf("    :%s (", port->name);
-  bool_print(port->state);
-  printf(")");
+	printf("    :%s (", port->name);
+	bool_print(port->state);
+	printf(")\t");
 
-  // Print an arrow when it has a connection only
-  if (port->connections.amount > 0) {
-    printf(" --> ");
-  }
+	// Only print an arrow when it has a connection
+	if (port->connections.amount > 0) {
+		if (port->type == PortType_INPUT) {
+			printf(" <-- ");
+		}
+		else if (port->type == PortType_OUTPUT) {
+			printf(" --> ");
+		}
+		else if (port->type == PortType_NODE) {
+			printf(" <-> ");
+		}
+	}
 
-  // Print the connections
-  VEC_EACH_INDEX(port->connections, port_t *connection, i) {
-    char *gatename = connection->gate->name;
+	// Print the connections
+	VEC_EACH_INDEX(port->connections, port_t *connection, i) {
+		char *gatename = connection->gate->name;
+		char *gatetype = connection->gate->type;
 
-    printf("%s:%s", gatename, connection->name);
+		printf("%s {%s}:%s", gatename, gatetype, connection->name);
 
-    // Not the last item
-    if (i < port->connections.amount - 1) {
-      printf(", ");
-    }
-  }
+		// Print a comma when it's not the last item
+		if (i < port->connections.amount - 1) {
+			printf(", ");
+		}
+	}
 }
 
 
 void port_init(port_t *port) {
-  port->name = NULL;
-  port->gate = NULL;
+	port->name = NULL;
+	port->gate = NULL;
 
-  // Defaults
-  port->state = false;
-  port->type = PortType_OUTPUT;
+	// Defaults
+	port->state = false;
+	port->type = PortType_NODE;
 
-  vector_init(&port->connections, BUF_SIZE);
+	vector_init(&port->connections, BUF_SIZE);
 }
 
 
 void port_free(port_t *port) {
-  if (port->name) free(port->name);
+	if (port->name) free(port->name);
 
-  vector_free(&port->connections);
+	vector_free(&port->connections);
 }

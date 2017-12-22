@@ -1,0 +1,13 @@
+notor
+
+[gates] 4
+7f68caf5 IN #I0
+3b109a18 OUT #O0
+867350cd NOT
+fbfc7585 OR
+
+[wires] 4
+7f68caf5:I0 fbfc7585:I0
+7f68caf5:I0 867350cd:I0
+867350cd:O0 fbfc7585:I1
+fbfc7585:O0 3b109a18:O0

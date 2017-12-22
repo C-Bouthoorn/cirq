@@ -1,0 +1,83 @@
+{
+ "name": "notor2",
+ "circuit": {
+  "gates": {
+   "a0055d19": {
+    "type": "notor"
+   },
+   "243a080a": {
+    "type": "IN"
+   },
+   "a3b247c8": {
+    "type": "IN"
+   },
+   "751a7396": {
+    "type": "OR"
+   },
+   "8a8bda59": {
+    "type": "notor"
+   },
+   "8edeefd9": {
+    "type": "OUT"
+   }
+  },
+  "wires": [
+   {
+    "a": "243a080a:I0",
+    "b": "a0055d19:I0"
+   },
+   {
+    "a": "a3b247c8:I1",
+    "b": "8a8bda59:I0"
+   },
+   {
+    "a": "a0055d19:O0",
+    "b": "751a7396:I0"
+   },
+   {
+    "a": "8a8bda59:O0",
+    "b": "751a7396:I1"
+   },
+   {
+    "a": "751a7396:O0",
+    "b": "8edeefd9:O0"
+   }
+  ]
+ },
+ "customGates": {
+  "notor": {
+   "gates": {
+    "7f68caf5": {
+     "type": "IN"
+    },
+    "3b109a18": {
+     "type": "OUT"
+    },
+    "867350cd": {
+     "type": "NOT"
+    },
+    "fbfc7585": {
+     "type": "OR"
+    }
+   },
+   "wires": [
+    {
+     "a": "7f68caf5:I0",
+     "b": "fbfc7585:I0"
+    },
+    {
+     "a": "7f68caf5:I0",
+     "b": "867350cd:I0"
+    },
+    {
+     "a": "867350cd:O0",
+     "b": "fbfc7585:I1"
+    },
+    {
+     "a": "fbfc7585:O0",
+     "b": "3b109a18:O0"
+    }
+   ]
+  }
+ }
+}

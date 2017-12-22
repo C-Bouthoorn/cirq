@@ -12,27 +12,28 @@ typedef struct gate gate_t;
 
 
 typedef enum PortType {
-  PortType_INPUT,
-  PortType_OUTPUT
+	PortType_INPUT,
+	PortType_OUTPUT,
+	PortType_NODE
 } PortType_t;
 
 
 
 typedef struct port {
-  char *name;
-  bool state;
-  PortType_t type;
+	char *name;
+	bool state;
+	gate_t *gate;
 
-  gate_t *gate;
-  vector_t connections;
+	PortType_t type;
+	vector_t connections;
 } port_t;
 
 
 bool port_update_state(port_t *port);
 bool port_set_state(port_t *port, bool state);
-bool port_get_state(port_t *port);
 
 
+port_t *port_copy(port_t *src);
 void port_print(port_t *port);
 void port_init(port_t *port);
 void port_free(port_t *port);

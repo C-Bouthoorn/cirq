@@ -1,0 +1,47 @@
+[ <0x01d0> 0e36e9ea {IN} ]	:I0 (false)	 --> 3752723b {half_adder}:I0
+[ <0x0210> 63f0d9e3 {IN} ]	:I1 (false)	 --> 3752723b {half_adder}:I1
+[ <0x0250> b9f8820d {IN} ]	:Ci (false)	 --> 45243a79 {half_adder}:I1
+
+[ <0x0290> 2c9ced3a {OUT} ]	:S (false)	 <-- 45243a79 {half_adder}:S
+[ <0x02d0> 57f26486 {OUT} ]	:Co (false)	 <-- e16e5e97 {OR}:O0
+
+
+[ <0x0350> 3752723b {half_adder} ]
+    :I0 (false)	 <-> 18286b9b {XOR}:I0, f66e7062 {AND}:I0, 0e36e9ea {IN}:I0
+    :I1 (false)	 <-> 18286b9b {XOR}:I1, f66e7062 {AND}:I1, 63f0d9e3 {IN}:I1
+    :S (false)	 <-> 18286b9b {XOR}:O0, 45243a79 {half_adder}:I0
+    :C (false)	 <-> f66e7062 {AND}:O0, e16e5e97 {OR}:I0
+
+	[ <0x03d0> 18286b9b {XOR} ]
+	    :I0 (false)	 <-- 3752723b {half_adder}:I0
+	    :I1 (false)	 <-- 3752723b {half_adder}:I1
+	    :O0 (false)	 --> 3752723b {half_adder}:S
+
+	[ <0x04d0> f66e7062 {AND} ]
+	    :I0 (false)	 <-- 3752723b {half_adder}:I0
+	    :I1 (false)	 <-- 3752723b {half_adder}:I1
+	    :O0 (false)	 --> 3752723b {half_adder}:C
+
+
+[ <0x0510> 45243a79 {half_adder} ]
+    :I0 (false)	 <-> 18286b9b {XOR}:I0, f66e7062 {AND}:I0, 3752723b {half_adder}:S
+    :I1 (false)	 <-> 18286b9b {XOR}:I1, f66e7062 {AND}:I1, b9f8820d {IN}:Ci
+    :S (false)	 <-> 18286b9b {XOR}:O0, 2c9ced3a {OUT}:S
+    :C (false)	 <-> f66e7062 {AND}:O0, e16e5e97 {OR}:I1
+
+	[ <0x0590> 18286b9b {XOR} ]
+	    :I0 (false)	 <-- 45243a79 {half_adder}:I0
+	    :I1 (false)	 <-- 45243a79 {half_adder}:I1
+	    :O0 (false)	 --> 45243a79 {half_adder}:S
+
+	[ <0x0690> f66e7062 {AND} ]
+	    :I0 (false)	 <-- 45243a79 {half_adder}:I0
+	    :I1 (false)	 <-- 45243a79 {half_adder}:I1
+	    :O0 (false)	 --> 45243a79 {half_adder}:C
+
+
+[ <0x0310> e16e5e97 {OR} ]
+    :I0 (false)	 <-- 3752723b {half_adder}:C
+    :I1 (false)	 <-- 45243a79 {half_adder}:C
+    :O0 (false)	 --> 57f26486 {OUT}:Co
+

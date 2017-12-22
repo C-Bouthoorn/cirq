@@ -6,10 +6,10 @@
 
 
 typedef struct wire {
-  char *leftuuid;
-  char *leftport;
-  char *rightuuid;
-  char *rightport;
+	char *leftuuid;
+	char *leftport;
+	char *rightuuid;
+	char *rightport;
 } wire_t;
 
 

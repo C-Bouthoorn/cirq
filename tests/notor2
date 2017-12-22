@@ -1,0 +1,16 @@
+notor2
+
+[gates] 6
+243a080a IN #I0
+a3b247c8 IN #I1
+8edeefd9 OUT #O0
+751a7396 OR
+a0055d19 notor
+8a8bda59 notor
+
+[wires] 5
+243a080a:I0 a0055d19:I0
+a3b247c8:I1 8a8bda59:I0
+a0055d19:O0 751a7396:I0
+8a8bda59:O0 751a7396:I1
+751a7396:O0 8edeefd9:O0

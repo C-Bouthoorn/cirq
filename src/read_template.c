@@ -1,117 +1,146 @@
 #include "read_template.h"
 
 #include "assert.h"
+#include "benchmark.h"
 
 
 bool read_template(char *filename, circuit_t *circ, vector_t *dependencies) {
-  assert_neq(filename, NULL);
-  assert_neq(circ, NULL);
+	FUNC_START();
 
-  char buf[BUF_SIZE];
+	assert_not_null(filename);
+	assert_not_null(circ);
 
-  // Open file
-  FILE *file = fopen(filename, "r");
-  assert_neq(file, NULL);
+	// Temporary buffer
+	char buf[BUF_SIZE];
 
-  // Get name, which is always the first thing in a file
-  // example: NAND
-  circ->name = malloc(BUF_SIZE * sizeof(char));
-  fscanf(file, "%s\n", circ->name);
+	bool success = true;
 
+	// Open file
+	FILE *file = fopen(filename, "r");
+	assert_not_null(file);
 
-  // Get gates, which are always second
-  // example:  [gates] 16
-  size_t amount_gates;
-
-  fscanf(file, "%s %lu\n", buf, &amount_gates);
-
-  if ( strcmp(buf, "[gates]") != 0 ) {
-    panic("no [gates]?? '%s' unexpected", buf);
-  }
+	// Get name, which is always the first thing in a file
+	// example: NAND
+	circ->name = malloc(BUF_SIZE);
+	fscanf(file, "%s\n", circ->name);
 
 
-  for (size_t i = 0; i < amount_gates; i++) {
-    char *name = malloc(BUF_SIZE * sizeof(char));
-    char *type = malloc(BUF_SIZE * sizeof(char));
-    char *portname = malloc(BUF_SIZE * sizeof(char));
+	// Get gates, which are always second
+	// example:  [gates] 16
+	size_t amount_gates;
 
-    // Get data
-    // example:  5cf6cdaa IN #I0
-    int read_arguments = fscanf(file, "%s %s #%s\n", name, type, portname);
+	fscanf(file, "%s %lu\n", buf, &amount_gates);
 
-    // If no portname is read, free it
-    // example:  6306ee7f NOT
-    if (read_arguments == 2) {
-      free(portname);
-      portname = NULL;
-    }
-
-    if ( read_arguments == -1 ) {
-      // Unexpected end of file
-      panic("EOF??");
-    }
-
-    // New gate
-    gate_t *g = malloc(sizeof(gate_t));
-    gate_init(g);
+	if (strcmp(buf, "[gates]") != 0) {
+		panic("no [gates]?? %s unexpected", buf);
+		FUNC_END();
+		return false;
+	}
 
 
-    g->name = name;
-    g->type = type;
+	for (size_t i = 0; i < amount_gates; i++) {
+		char *name = malloc(BUF_SIZE);
+		char *type = malloc(BUF_SIZE);
+		char *portname = malloc(BUF_SIZE);
 
-    // Set the correct ports
-    assert(gate_set_ports(g, portname, dependencies));
+		// Get data
+		// example:  5cf6cdaa IN #I0
+		int read_arguments = fscanf(file, "%s %s #%s\n", name, type, portname);
 
-    // Add gate to circuit
-    assert(vector_push(&circ->gates, g));
-  }
+		// If no portname is read, free it
+		// example:  6306ee7f NOT
+		if (read_arguments == 2) {
+			free(portname);
+			portname = NULL;
+		}
 
+		if (read_arguments == -1) {
+			// Unexpected end of file
+			panic("EOF??");
+			FUNC_END();
+			return false;
+		}
 
-  // Get wires, which are third
-  // example:  [wires] 20
-  size_t amount_wires;
+		// New gate
+		gate_t *g = malloc(sizeof(gate_t));
+		gate_init(g);
 
-  fscanf(file, "%s %lu\n", buf, &amount_wires);
+		g->name = name;
+		g->type = type;
 
-  if ( strcmp(buf, "[wires]") != 0 ) {
-    panic("no [wires]?? '%s' unexpected", buf);
-  }
+		// Set the correct ports
+		FUNC_PAUSE();
+		success &= gate_set_ports(g, portname, dependencies);
 
-  for (size_t i = 0; i < amount_wires; i++) {
-    char *leftuuid = malloc(BUF_SIZE * sizeof(char));
-    char *leftport = malloc(BUF_SIZE * sizeof(char));
-    char *rightuuid = malloc(BUF_SIZE * sizeof(char));
-    char *rightport = malloc(BUF_SIZE * sizeof(char));
-
-    // example:  da2ecd25:O0 eec2fc01:I0
-    int x = fscanf(file, "%[a-f0-9]:%s %[a-f0-9]:%s\n", leftuuid, leftport, rightuuid, rightport);
-
-    if ( x == -1 ) {
-      // Unexpected end of file
-      panic("EOF??");
-    }
-
-    // Create new wire
-    wire_t *w = malloc(sizeof(wire_t));
-    wire_init(w);
-
-    w->leftuuid = leftuuid;
-    w->leftport = leftport;
-    w->rightuuid = rightuuid;
-    w->rightport = rightport;
-
-    assert(circuit_apply_wire(circ, w));
-
-    wire_free(w);
-    free(w);
-  }
-
-  // Close template file
-  fclose(file);
+		// Add gate to circuit
+		assert(hex_hashmap_add_item(&circ->gates, g->name, g));
+		FUNC_RESUME();
+	}
 
 
-  // Make sure all gates are in the right state
-  // NOTE: This will crash if a contradicting loop occurs in the program
-  //   example: NOT:I0 <---> NOT:O0
-  return circuit_update_state(circ);
+	// Get wires, which are third
+	// example:  [wires] 20
+	size_t amount_wires;
+
+	fscanf(file, "%s %lu\n", buf, &amount_wires);
+
+	if (strcmp(buf, "[wires]") != 0) {
+		panic("no [wires]?? %s unexpected", buf);
+		FUNC_END();
+		return false;
+	}
+
+
+	for (size_t i = 0; i < amount_wires; i++) {
+		char *leftuuid = malloc(BUF_SIZE);
+		char *leftport = malloc(BUF_SIZE);
+		char *rightuuid = malloc(BUF_SIZE);
+		char *rightport = malloc(BUF_SIZE);
+
+		// example:  da2ecd25:O0 eec2fc01:I0
+		int x = fscanf(file, "%[a-f0-9]:%s %[a-f0-9]:%s\n", leftuuid, leftport, rightuuid, rightport);
+
+		if (x == -1) {
+			// Unexpected end of file
+			panic("EOF??");
+			FUNC_END();
+			return false;
+		}
+
+		// Create new wire
+		wire_t *w = malloc(sizeof(wire_t));
+		wire_init(w);
+
+		w->leftuuid = leftuuid;
+		w->leftport = leftport;
+		w->rightuuid = rightuuid;
+		w->rightport = rightport;
+
+		// Apply wire to circuit
+		FUNC_PAUSE();
+		success &= circuit_apply_wire(circ, w);
+		FUNC_RESUME();
+
+		// Free wire again
+		wire_free(w);
+		free(w);
+	}
+
+	// Close template file
+	fclose(file);
+
+
+	// circuit_print(circ, 0);
+
+
+	// Make sure all gates are in the right state
+	// NOTE: This will crash if a contradicting loop occurs in the program
+	//   example: NOT:I0 <---> NOT:O0
+	FUNC_PAUSE();
+	success &= circuit_update_state(circ);
+	FUNC_RESUME();
+
+
+	FUNC_END();
+	return success;
 }

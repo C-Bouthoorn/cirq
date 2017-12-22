@@ -4,5 +4,5 @@
 
 
 void bool_print(bool b) {
-  printf(b ? "true" : "false");
+	printf(b ? "true" : "false");
 }
