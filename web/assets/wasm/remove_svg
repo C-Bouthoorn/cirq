@@ -1,0 +1,17 @@
+#!/bin/bash
+
+file="$1"
+
+if [ "x$file" = "x" ]; then
+    echo "No file specified" >&2
+    exit 1
+fi
+
+# Make backup
+mv "$file" "$file.bak"
+
+# Remove <svg ...>...</svg>
+cat "$file.bak" | tr '\n' '\r' | sed -E 's@<svg.+>.+?</svg>@@g' | tr '\r' '\n' > "$file"
+
+# Remove backup
+rm "$file.bak"

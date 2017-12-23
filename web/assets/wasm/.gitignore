@@ -1,0 +1,8 @@
+*.js
+*.wasm
+
+*.html
+*.html.bak
+*.html.mem
+
+!.eslintrc.js
