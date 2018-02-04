@@ -1,5 +1,6 @@
 #include "read_template.h"
 #include "test.h"
+#include "benchmark.h"
 
 
 #if DEBUG_ON
@@ -17,6 +18,7 @@
 
 
 test_result_t test_nested(void) {
+	FUNC_START();
 	TEST_START;
 
 	// Create circuit
@@ -94,5 +96,7 @@ test_result_t test_nested(void) {
 	circuit_free(&notor);
 	vector_free(&deps);
 
+
+	FUNC_END();
 	TEST_END;
 }

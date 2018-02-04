@@ -6,13 +6,11 @@
 
 unsigned int test_all(int argc, char *argv[]) {
 	FUNC_START();
-
 	TESTS_START;
+
 
 	// If no tests specified, run some default tests
 	if (argc == 1) {
-		FUNC_PAUSE();
-
 		TEST(hhmtest);
 
 		TEST(test_nand);
@@ -24,14 +22,10 @@ unsigned int test_all(int argc, char *argv[]) {
 
 		TEST(test_half_adder);
 		TEST(test_full_adder);
-
-		FUNC_RESUME();
 	}
 
 
 	for (int i = 1; i < argc; i++) {
-		FUNC_PAUSE();
-
 		switch_str(argv[i]) {
 			case_str("full_adder") {
 				TEST(test_full_adder);
@@ -62,8 +56,6 @@ unsigned int test_all(int argc, char *argv[]) {
 				TEST(test_xor);
 			}
 		}
-
-		FUNC_RESUME();
 	}
 
 

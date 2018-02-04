@@ -15,12 +15,10 @@ bool port_update_state(port_t *port) {
 
 	if (port->type == PortType_INPUT) {
 		// Input ports should update the gate they are attached to
-		FUNC_PAUSE();
 		success &= gate_update_state(port->gate);
-		FUNC_RESUME();
 	}
 
-	else if (port->type == PortType_OUTPUT || port->type == PortType_NODE) {
+	else { // if (port->type == PortType_OUTPUT || port->type == PortType_NODE) {
 		// Outputs and nodes should copy their state to their connected inputs and nodes
 		VEC_EACH(port->connections, port_t *connection) {
 			// Filter on inputs and nodes
@@ -28,9 +26,7 @@ bool port_update_state(port_t *port) {
 				continue;
 			}
 
-			FUNC_PAUSE();
 			success &= port_set_state(connection, port->state);
-			FUNC_RESUME();
 		}
 	}
 
@@ -51,9 +47,7 @@ bool port_set_state(port_t *port, bool state) {
 
 	port->state = state;
 
-	FUNC_PAUSE();
 	bool success = port_update_state(port);
-	FUNC_RESUME();
 
 	FUNC_END();
 	return success;

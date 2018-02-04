@@ -1,8 +1,11 @@
 #include "hhmtest.h"
+#include "benchmark.h"
 
 
 test_result_t populate_map(hex_hashmap_t *map) {
+	FUNC_START();
 	TEST_START;
+
 
 	assert_not_null(map);
 
@@ -55,11 +58,13 @@ test_result_t populate_map(hex_hashmap_t *map) {
 	}
 
 
+	FUNC_END();
 	TEST_END;
 }
 
 
 test_result_t hhmtest(void) {
+	FUNC_START();
 	TEST_START;
 
 
@@ -119,7 +124,6 @@ test_result_t hhmtest(void) {
 	assert_eq(amount, 8);
 
 
-
 	// Free everything
 	HEX_HASHMAP_EACH_VALUE(map, item_t *item) {
 		free(item);
@@ -127,5 +131,6 @@ test_result_t hhmtest(void) {
 	hex_hashmap_free(&map);
 
 
+	FUNC_END();
 	TEST_END;
 }

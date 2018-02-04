@@ -1,0 +1,73 @@
+{
+ "name": "XNOR",
+ "circuit": {
+  "gates": {
+   "fb158026": {
+    "type": "IN",
+    "ports": {
+     "O0": {
+      "name": "I0"
+     }
+    }
+   },
+   "2f5f861f": {
+    "type": "IN",
+    "ports": {
+     "O0": {
+      "name": "I1"
+     }
+    }
+   },
+   "ee6a20b4": {
+    "type": "XOR",
+    "ports": {
+     "I0": {
+      "name": "I0"
+     },
+     "I1": {
+      "name": "I1"
+     },
+     "O0": {
+      "name": "O0"
+     }
+    }
+   },
+   "f317ba4e": {
+    "type": "NOT",
+    "ports": {
+     "I0": {
+      "name": "I0"
+     },
+     "O0": {
+      "name": "O0"
+     }
+    }
+   },
+   "9c482391": {
+    "type": "OUT",
+    "ports": {
+     "I0": {
+      "name": "O0"
+     }
+    }
+   }
+  },
+  "wires": [
+   {
+    "a": "fb158026:I0",
+    "b": "ee6a20b4:I0"
+   },
+   {
+    "a": "2f5f861f:I1",
+    "b": "ee6a20b4:I1"
+   },
+   {
+    "a": "ee6a20b4:O0",
+    "b": "f317ba4e:I0"
+   },
+   {
+    "a": "f317ba4e:O0",
+    "b": "9c482391:O0"
+   }
+  ]
+ }

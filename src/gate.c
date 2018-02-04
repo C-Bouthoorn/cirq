@@ -23,6 +23,7 @@ port_t *gate_get_port_by_name(gate_t *gate, char *name) {
 
 
 	warn("Failed to find port %s for gate %s", name, gate->name);
+
 	FUNC_END();
 	return NULL;
 }
@@ -83,11 +84,10 @@ bool gate_set_ports(gate_t *gate, char *portname, vector_t *dependencies) {
 
 	switch_str(gate->type) {
 		case_str("AND") {
-			FUNC_PAUSE();
 			success &= gate_add_input(gate, 0, NULL);
 			success &= gate_add_input(gate, 1, NULL);
 			success &= gate_add_output(gate, 0, NULL);
-			FUNC_RESUME();
+
 
 			FUNC_END();
 			return success;
@@ -95,11 +95,10 @@ bool gate_set_ports(gate_t *gate, char *portname, vector_t *dependencies) {
 
 
 		else case_str("OR") {
-			FUNC_PAUSE();
 			success &= gate_add_input(gate, 0, NULL);
 			success &= gate_add_input(gate, 1, NULL);
 			success &= gate_add_output(gate, 0, NULL);
-			FUNC_RESUME();
+
 
 			FUNC_END();
 			return success;
@@ -107,11 +106,10 @@ bool gate_set_ports(gate_t *gate, char *portname, vector_t *dependencies) {
 
 
 		else case_str("XOR") {
-			FUNC_PAUSE();
 			success &= gate_add_input(gate, 0, NULL);
 			success &= gate_add_input(gate, 1, NULL);
 			success &= gate_add_output(gate, 0, NULL);
-			FUNC_RESUME();
+
 
 			FUNC_END();
 			return success;
@@ -119,10 +117,9 @@ bool gate_set_ports(gate_t *gate, char *portname, vector_t *dependencies) {
 
 
 		else case_str("NOT") {
-			FUNC_PAUSE();
 			success &= gate_add_input(gate, 0, NULL);
 			success &= gate_add_output(gate, 0, NULL);
-			FUNC_RESUME();
+
 
 			FUNC_END();
 			return success;
@@ -130,9 +127,8 @@ bool gate_set_ports(gate_t *gate, char *portname, vector_t *dependencies) {
 
 
 		else case_str("IN") {
-			FUNC_PAUSE();
 			success &= gate_add_output(gate, 0, portname);
-			FUNC_RESUME();
+
 
 			FUNC_END();
 			return success;
@@ -140,9 +136,8 @@ bool gate_set_ports(gate_t *gate, char *portname, vector_t *dependencies) {
 
 
 		else case_str("OUT") {
-			FUNC_PAUSE();
 			success &= gate_add_input(gate, 0, portname);
-			FUNC_RESUME();
+
 
 			FUNC_END();
 			return success;
@@ -151,9 +146,7 @@ bool gate_set_ports(gate_t *gate, char *portname, vector_t *dependencies) {
 
 		else {
 			// Try to find circuit in dependencies
-			FUNC_PAUSE();
 			circuit_t *custom = find_dependency(dependencies, gate->type);
-			FUNC_RESUME();
 
 			// If failed to find custom circuit
 			if (custom == NULL) {
@@ -163,15 +156,11 @@ bool gate_set_ports(gate_t *gate, char *portname, vector_t *dependencies) {
 			}
 
 			// Copy circuit to inner circuit
-			FUNC_PAUSE();
 			gate->inner_circuit = circuit_copy(custom);
-			FUNC_RESUME();
-
 
 			// Link to inner circuit
-			FUNC_PAUSE();
 			success &= gate_link_inner_circuit(gate);
-			FUNC_RESUME();
+
 
 			FUNC_END();
 			return success;
@@ -180,6 +169,7 @@ bool gate_set_ports(gate_t *gate, char *portname, vector_t *dependencies) {
 
 
 	warn("Reached invalid clause?");
+
 	FUNC_END();
 	return false;
 }
@@ -214,41 +204,32 @@ bool gate_link_inner_circuit(gate_t *gate) {
 		strcpy(newportname, portname);
 
 		// Add new port
-		FUNC_PAUSE();
 		success &= gate_add_node(gate, newportname);
-		FUNC_RESUME();
-
 
 		// Copy connections
 		port_t *node = gate->ports.items[gate->ports.amount - 1];
 
-		FUNC_PAUSE();
 		assert(vector_copy(&node->connections, &inner_port->connections));
-		FUNC_RESUME();
 
 
 		VEC_EACH(inner_port->connections, port_t *conn) {
 			// Remove old links to the outer gate
 			VEC_EACH(conn->connections, port_t *inner_conn) {
 				if (inner_conn == inner_port) {
-					FUNC_PAUSE();
 					assert(vector_remove(&conn->connections, inner_port));
-					FUNC_RESUME();
 				}
 			}
 
 			// ... but redirect them to the node directly
-			FUNC_PAUSE();
 			assert(vector_push(&conn->connections, node));
-			FUNC_RESUME();
 		}
 
+
 		// Remove IO gate from inner circuit
-		FUNC_PAUSE();
 		assert(hex_hashmap_remove_item(&gate->inner_circuit->gates, inner_gate->name));
 		gate_free(inner_gate);
 		free(inner_gate);
-		FUNC_RESUME();
+
 	}
 
 
@@ -280,9 +261,9 @@ bool gate_update_state(gate_t *gate) {
 			// Apply AND
 			o0->state = i0->state & i1->state;
 
-			FUNC_PAUSE();
+
 			bool success = port_update_state(o0);
-			FUNC_RESUME();
+
 
 			FUNC_END();
 			return success;
@@ -305,9 +286,9 @@ bool gate_update_state(gate_t *gate) {
 			// Apply OR
 			o0->state = i0->state | i1->state;
 
-			FUNC_PAUSE();
+
 			bool success = port_update_state(o0);
-			FUNC_RESUME();
+
 
 			FUNC_END();
 			return success;
@@ -330,9 +311,9 @@ bool gate_update_state(gate_t *gate) {
 			// Appl XOR
 			o0->state = i0->state ^ i1->state;
 
-			FUNC_PAUSE();
+
 			bool success = port_update_state(o0);
-			FUNC_RESUME();
+
 
 			FUNC_END();
 			return success;
@@ -352,9 +333,9 @@ bool gate_update_state(gate_t *gate) {
 			// Apply NOT
 			o0->state = ! i0->state;
 
-			FUNC_PAUSE();
+
 			bool success = port_update_state(o0);
-			FUNC_RESUME();
+
 
 			FUNC_END();
 			return success;
@@ -431,24 +412,17 @@ gate_t *gate_copy(gate_t *src) {
 
 	// Copy inner circuit if any
 	if (src->inner_circuit != NULL) {
-		FUNC_PAUSE();
 		dest->inner_circuit = circuit_copy(src->inner_circuit);
-		FUNC_RESUME();
 	}
 
 	// Copy ports
 	VEC_EACH(src->ports, port_t *port) {
 		assert_not_null(port);
 
-		FUNC_PAUSE();
 		port_t *new_port = port_copy(port);
-		FUNC_RESUME();
-
 		new_port->gate = dest;
 
-		FUNC_PAUSE();
 		assert(vector_push(&dest->ports, new_port));
-		FUNC_RESUME();
 	}
 
 

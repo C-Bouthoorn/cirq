@@ -1,8 +1,10 @@
 #include "read_template.h"
 #include "test.h"
+#include "benchmark.h"
 
 
 test_result_t test_nor(void) {
+	FUNC_START();
 	TEST_START;
 
 	// Create circuit
@@ -55,5 +57,7 @@ test_result_t test_nor(void) {
 	circuit_free(circ);
 	free(circ);
 
+
+	FUNC_END();
 	TEST_END;
 }

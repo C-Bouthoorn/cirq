@@ -40,21 +40,23 @@ RESET := $(shell echo -ne "\e[0m")
 TAB := $(shell echo -ne "\t")
 
 # All targets that are not files
-.PHONY: help asan all shit bench bench_build valgrind valshit run clean remake cleanrun
+.PHONY: help asan all shit release bench bench_rel bench_build valgrind valshit run clean remake cleanrun
 
 
 # Show some help
 help:
-	@echo -e "make help      show this help"
-	@echo -e "make all       build all files with ASAN on clang"
-	@echo -e "make shit      build all files with ASAN on gcc"
-	@echo -e "make bench     build all files with ASAN on clang with benchmarking on"
-	@echo -e "make valgrind  build all files (clang), then run with valgrind"
-	@echo -e "make valshit   build all files (gcc), then run with valgrind"
-	@echo -e "make run       just run the executable"
-	@echo -e "make clean     remove all build files"
-	@echo -e "make remake    same as make clean; make all"
-	@echo -e "make cleanrun  same as make remake, but runs formed executable directly after"
+	@echo "make help      show this help"
+	@echo "make all       build all files with ASAN on clang"
+	@echo "make shit      build all files with ASAN on gcc"
+	@echo "make release   build all files with -O3 on clang"
+	@echo "make bench     build all files with ASAN on clang with benchmarking on"
+	@echo "make bench_rel build all files with -O3 on clang with benchmarking on"
+	@echo "make valgrind  build all files (clang), then run with valgrind"
+	@echo "make valshit   build all files (gcc), then run with valgrind"
+	@echo "make run       just run the executable"
+	@echo "make clean     remove all build files"
+	@echo "make remake    same as make clean; make all"
+	@echo "make cleanrun  same as make remake, but runs formed executable directly after"
 
 
 # ASAN
@@ -72,15 +74,24 @@ shit: CFLAGS = $(GCC_FLAGS)
 shit: asan
 
 
-bench_build: CFLAGS = -O3 -DBENCH
+release: CFLAGS = -O3 -DIGNORE_ASSERT
+release: build/release
+
+build/release: $(OUTPUT_EXEC)
+	@mv $(OUTPUT_EXEC) build/release
+
+
+# Debug + Clang + ASAN
+bench_build: CFLAGS += -DBENCH
 bench_build: cleanrun
+
 
 bench:
 	@rm -f /tmp/bench
 	@touch /tmp/bench
 	@make --no-print-directory bench_build
 	@rm -f /tmp/bench.tmp
-	@sort -n /tmp/bench
+	@sort -nr /tmp/bench
 	@rm -f /tmp/bench
 
 

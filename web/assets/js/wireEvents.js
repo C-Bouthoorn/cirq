@@ -5,44 +5,44 @@ let firstTarget = null, secondTarget = null;
 
 
 function mousedown(event) {
-  // Make sure SHIFT is pressed
-  if (! event.shiftKey) return;
+    // Make sure SHIFT is pressed
+    if (! event.shiftKey) return;
 
-  firstTarget = event.target;
+    firstTarget = event.target;
 }
 
 
 function mouseup(event) {
-  // Make sure we got a first target
-  if (! firstTarget) return;
+    // Make sure we got a first target
+    if (! firstTarget) return;
 
-  secondTarget = event.target;
+    secondTarget = event.target;
 
-  createWire();
+    createWire();
 
-  // Reset values
-  firstTarget = null;
-  secondTarget = null;
+    // Reset values
+    firstTarget = null;
+    secondTarget = null;
 }
 
 
 function createWire() {
-  if (! isValidTarget(firstTarget) || ! isValidTarget(secondTarget)) {
-    console.error("Invalid destination for wire");
-    return;
-  }
+    if (! isValidTarget(firstTarget) || ! isValidTarget(secondTarget)) {
+        console.error("Invalid destination for wire");
+        return;
+    }
 
-  // Create wire
-  let wire = new Wire(firstTarget, secondTarget);
+    // Create wire
+    let wire = new Wire(firstTarget, secondTarget);
 
-  // Draw wire
-  let circuitElem = document.getElementById('circuit');
-  wire.draw(circuitElem);
+    // Draw wire
+    let circuitElem = document.getElementById('circuit');
+    wire.draw(circuitElem);
 }
 
 
 function isValidTarget(target) {
-  return target.classList.contains('port');
+    return target.classList.contains('port');
 }
 
 

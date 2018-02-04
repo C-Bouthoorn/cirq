@@ -4,47 +4,45 @@
 
 #include <time.h>
 
+#include "vector.h"
 
-#define double_time(time) ((double) time.tv_sec + 1.0e-9 * time.tv_nsec)
+
+#define double_time(time) ((long) 1e9 * (long) time.tv_sec + (long) time.tv_nsec)
 
 
 #ifdef BENCH
-	#define FUNC_START() \
-		struct timespec __actual_start = {0, 0}, __actual_end = {0, 0}, __tmp = {0, 0}; \
-		clock_gettime(CLOCK_MONOTONIC, &__tmp); \
-		__actual_start = __tmp; \
-		double __start = double_time(__tmp), __end = 0; \
-		// printf("start %lf\n", __start); \
-
-	#define FUNC_PAUSE() ; \
-		clock_gettime(CLOCK_MONOTONIC, &__tmp); \
-		__end = double_time(__tmp); \
-		// printf("pause %lf %lf\n", __end, __end - __start); \
-
-
-	#define FUNC_RESUME() ; \
-		clock_gettime(CLOCK_MONOTONIC, &__tmp); \
-		__start = double_time(__tmp) - (__end - __start); \
-		// printf("resume %lf\n", __start); \
-
-
-	#define FUNC_END() \
-		clock_gettime(CLOCK_MONOTONIC, &__tmp); \
-		__actual_end = __tmp; \
-		__end = double_time(__tmp); \
-		BENCH_ADD(__FUNCTION__, __end - __start, double_time(__actual_end) - double_time(__actual_start)); \
-		// printf("end %lf %lf\n", __end,__end - __start); \
-
+	#define FUNC_START()  bench_start_func(__FUNCTION__);
+	#define FUNC_END()  bench_end_func(__FUNCTION__);
 #else
 	#define FUNC_START()
-	#define FUNC_PAUSE()
-	#define FUNC_RESUME()
 	#define FUNC_END()
-
 #endif
 
 
-void BENCH_ADD(const char func[], double effective_time, double actual_time);
+typedef struct benchmark_state {
+	const char *func_name;
+
+	long actual_time;
+	long effective_time;
+
+	unsigned int amount;
+
+	struct timespec actual_start;
+	struct timespec effective_start;
+} benchmark_state_t;
+
+
+void bench_prepare(void);
+void bench_write_states(void);
+
+benchmark_state_t *bench_get_or_create_state_by_name(const char func_name[]);
+void bench_apply_starttime(benchmark_state_t *state, struct timespec start);
+void bench_apply_endtime(benchmark_state_t *state, struct timespec end);
+
+void bench_start_func(const char func_name[]);
+void bench_end_func(const char func_name[]);
+
+void benchmark_state_init(benchmark_state_t *state);
 
 
 #endif

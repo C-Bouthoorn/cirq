@@ -1,51 +1,53 @@
+/* globals require */
+
 require.config({
-  baseUrl: 'assets/js',
+    baseUrl: 'assets/js',
 
-  shim: {
-    utils: {
-      deps: [ ]
-    },
+    shim: {
+        utils: {
+            deps: [ ]
+        },
 
-    CustomGate: {
-      deps: [ 'utils' ],
-      exports: 'CustomGate',
-    },
+        Template: {
+            deps: [ 'utils' ],
+            exports: 'Template',
+        },
 
-    Template: {
-      deps: [ 'utils' ],
-      exports: 'Template',
-    },
+        Circuit: {
+            deps: [ 'utils' ],
+            exports: 'Circuit',
+        },
 
-    Circuit: {
-      deps: [ 'utils' ],
-      exports: 'Circuit',
-    },
+        Wire: {
+            deps: [ 'utils' ],
+            exports: 'Wire',
+        },
 
-    Wire: {
-      deps: [ 'utils' ],
-      exports: 'Wire',
-    },
+        Port: {
+            deps: [ 'Wire' ],
+            exports: 'Port',
+        },
 
-    Port: {
-      deps: [ 'Wire' ],
-      exports: 'Port',
-    },
+        CustomGate: {
+            deps: [ 'utils', 'Template' ],
+            exports: 'CustomGate',
+        },
 
-    Gate: {
-      deps: [ 'Port', 'utils' ],
-      exports: 'Gate',
-    },
+        Gate: {
+            deps: [ 'Port', 'utils' ],
+            exports: 'Gate',
+        },
 
-    wireEvents: {
-      deps: [ 'Wire' ],
-    },
+        wireEvents: {
+            deps: [ 'Wire' ],
+        },
 
-    dragAndDropEvents: {
-      deps: [ 'Gate', 'Wire', 'utils' ],
-    },
+        dragAndDropEvents: {
+            deps: [ 'Gate', 'Wire', 'Port', 'utils' ],
+        },
 
-    indexx: {
-      deps: [ 'dragAndDropEvents', 'wireEvents', 'Circuit', 'CustomGate', 'Template', 'utils', 'Wire', 'Gate' ],
+        indexx: {
+            deps: [ 'dragAndDropEvents', 'wireEvents', 'Circuit', 'CustomGate', 'utils', 'Wire', 'Gate' ],
+        },
     },
-  },
 });

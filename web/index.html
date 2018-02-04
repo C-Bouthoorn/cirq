@@ -1,42 +1,45 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8">
     <title>cirq - circuit generator</title>
 
     <link rel="stylesheet" href="assets/css/index.css">
-  </head>
-  <body>
+</head>
+<body>
     <div class="toolbox trash">
-      <div class="box basic">
-        <h3>BASIC</h3>
-        <div class="gate gate-AND" draggable="true" data-clone="true" data-type="AND" data-in="2" data-out="1">AND</div>
-        <div class="gate gate-OR"  draggable="true" data-clone="true" data-type="OR"  data-in="2" data-out="1">OR</div>
-        <div class="gate gate-NOT" draggable="true" data-clone="true" data-type="NOT" data-in="1" data-out="1">NOT</div>
-      </div>
+        <div class="box basic">
+            <h3>BASIC</h3>
+            <div class="gate gate-AND" draggable="true" data-clone="true" data-type="AND" data-in="2" data-out="1">AND</div>
+            <div class="gate gate-OR"  draggable="true" data-clone="true" data-type="OR"  data-in="2" data-out="1">OR</div>
+            <div class="gate gate-XOR" draggable="true" data-clone="true" data-type="XOR" data-in="2" data-out="1">XOR</div>
+            <div class="gate gate-NOT" draggable="true" data-clone="true" data-type="NOT" data-in="1" data-out="1">NOT</div>
+        </div>
 
-      <div class="box io">
-        <h3>IO</h3>
-        <div class="gate gate-IN"  draggable="true" data-clone="true" data-type="IN"  data-in="0" data-out="1">IN</div>
-        <div class="gate gate-OUT" draggable="true" data-clone="true" data-type="OUT" data-in="1" data-out="0">OUT</div>
-      </div>
+        <div class="box io">
+            <h3>IO</h3>
+            <div class="gate gate-IN"  draggable="true" data-clone="true" data-type="IN"  data-in="0" data-out="1">IN</div>
+            <div class="gate gate-OUT" draggable="true" data-clone="true" data-type="OUT" data-in="1" data-out="0">OUT</div>
+        </div>
 
-      <div class="box custom">
-        <h3>custom <button onclick="createCustomGateFromCurrentCircuit()">create</button></h3>
-      </div>
+        <div class="box custom">
+            <h3>custom</h3>
+            <button onclick="createCustomGateFromCurrentCircuit()">create</button>
+            <button onclick="loadCustomGateJSON(prompt('Enter JSON'))">load json</button>
+        </div>
 
-      <div class="box">
-        <button onclick="clearCircuit()">clear</button>
-        <button onclick="console.log(JSON.stringify(generateJSON(), null, 1))">json</button>
-        <button onclick="console.log(generateFile(generateJSON()))">file</button>
-      </div>
+        <div class="box">
+            <button onclick="clearCircuit()">clear</button>
+            <button onclick="console.log(JSON.stringify(generateJSON(), null, 1))">json</button>
+            <button onclick="console.log(generateFile(generateJSON()))">file</button>
+        </div>
     </div>
 
     <div id="circuit"></div>
 
 
     <script data-main="assets/js/req/index.js"
-      src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js"
-      integrity="sha256-0SGl1PJNDyJwcV5T+weg2zpEMrh7xvlwO4oXgvZCeZk=" crossorigin="anonymous"></script>
-  </body>
+    src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.5/require.min.js"
+    integrity="sha256-0SGl1PJNDyJwcV5T+weg2zpEMrh7xvlwO4oXgvZCeZk=" crossorigin="anonymous"></script>
+</body>
 </html>

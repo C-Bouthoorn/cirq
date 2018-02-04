@@ -1,5 +1,6 @@
 #include "read_template.h"
 #include "test.h"
+#include "benchmark.h"
 
 
 #if DEBUG_ON
@@ -20,6 +21,7 @@
 
 
 test_result_t test_full_adder(void) {
+	FUNC_START();
 	TEST_START;
 
 	// Create circuit
@@ -149,5 +151,7 @@ test_result_t test_full_adder(void) {
 	circuit_free(&ha_circ);
 	vector_free(&deps);
 
+
+	FUNC_END();
 	TEST_END;
 }

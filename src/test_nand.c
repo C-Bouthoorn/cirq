@@ -1,14 +1,16 @@
 #include "read_template.h"
 #include "test.h"
+#include "benchmark.h"
 
 
 test_result_t test_nand(void) {
+	FUNC_START();
 	TEST_START;
 
 	// Create circuit
 	circuit_t *circ = malloc(sizeof(circuit_t));
 	circuit_init(circ);
-	
+
 	// Read template
 	assert_true(read_template("tests/nand", circ, NULL));
 
@@ -55,5 +57,7 @@ test_result_t test_nand(void) {
 	circuit_free(circ);
 	free(circ);
 
+
+	FUNC_END();
 	TEST_END;
 }

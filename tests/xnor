@@ -1,0 +1,14 @@
+XNOR
+
+[gates] 5
+fb158026 IN #I0
+2f5f861f IN #I1
+ee6a20b4 XOR
+f317ba4e NOT
+9c482391 OUT #O0
+
+[wires] 4
+fb158026:I0 ee6a20b4:I0
+2f5f861f:I1 ee6a20b4:I1
+ee6a20b4:O0 f317ba4e:I0
+f317ba4e:O0 9c482391:O0

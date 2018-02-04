@@ -65,7 +65,7 @@ switch_str(name) {
 
 	}
 
-	case_str("bar") {
+	[else ]case_str("bar") {
 
 	}
 }

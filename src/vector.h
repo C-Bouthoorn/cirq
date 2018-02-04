@@ -32,6 +32,8 @@ typedef struct vector {
 
 
 bool vector_push(vector_t *vec, void *item);
+void *vector_pop(vector_t *vec);
+void *vector_last(vector_t *vec);
 bool vector_copy(vector_t *dest, vector_t *src);
 bool vector_remove(vector_t *vec, void *item);
 
