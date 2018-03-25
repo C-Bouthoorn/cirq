@@ -1,26 +1,29 @@
 #include "test.h"
 
+#include "benchmark.h"
 #ifdef BENCH
 	#include <stdlib.h>
-	#include "benchmark.h"
 #endif
 
 
 int main(int argc, char *argv[]) {
 	#ifdef BENCH
 		bench_prepare();
-
-		FUNC_START();
 		atexit(bench_write_states);
 	#endif
 
+	FUNC_START();
 
-	int failed_tests = (int) test_all(argc, argv);
+	#ifdef TEST
+		int failed_tests = (int) test_all(argc, argv);
 
-
-	#ifdef BENCH
 		FUNC_END();
-	#endif
+		return failed_tests;
+	#else
 
-	return failed_tests;
+		// Actual code here
+
+		FUNC_END();
+		return EXIT_SUCCESS;
+	#endif
 }

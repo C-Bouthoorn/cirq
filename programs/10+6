@@ -1,0 +1,13 @@
+# Intial value: 10
+mov rega 10
+debug rega
+
+# Add 6 -> 16
+add rega 6
+debug rega
+
+# 2*6+4
+mov regb 2
+mul regb 6
+add regb 4
+debug regb
