@@ -9,18 +9,24 @@
 #include <assert.h>
 
 
-#define BITCODE(x) const uint8_t x
+#define BITCODE(name) const uint8_t name
 
-BITCODE(MOV) = 0010;
-BITCODE(ADD) = 0011;
-BITCODE(MUL) = 0012;
+BITCODE(BYTE) = 0044;
+BITCODE(REG) = 0100;
 
-BITCODE(REGA) = 0100;
-BITCODE(REGB) = 0101;
-BITCODE(REGC) = 0102;
-BITCODE(REGD) = 0103;
+BITCODE(INC) = 0151;
+BITCODE(MOV) = 0075;
+BITCODE(ADD) = 0053;
+BITCODE(SUB) = 0055;
+BITCODE(MUL) = 0052;
+BITCODE(SQ) = 0062;
 
-BITCODE(DEBUG) = 0111;
+BITCODE(REGA) = 0101;
+BITCODE(REGB) = 0102;
+BITCODE(REGC) = 0103;
+BITCODE(REGD) = 0104;
+
+BITCODE(DEBUG) = 0140;
 
 
 
@@ -28,11 +34,17 @@ bool isnumber(char *str) {
     assert(str != NULL);
 
     size_t len = strlen(str), i = 0;
+    uint8_t base = 10;
 
     if (len == 0) return false;
 
     // binary, octal, decimal or hexadecimal
     if (str[i] == 'b' || str[i] == 'o' || str[i] == 'd' || str[i] == 'h') {
+        if (str[i] == 'b') base = 2;
+        else if (str[i] == 'o') base = 8;
+        else if (str[i] == 'd') base = 10;
+        else if (str[i] == 'h') base = 16;
+
         i++;
     }
 
@@ -42,7 +54,18 @@ bool isnumber(char *str) {
     }
 
     for (; i < len; i++) {
-        if (! isdigit(str[i])) {
+        char digit = str[i];
+
+        if (base == 2 && !(digit >= '0' && digit <= '1')) {
+            return false;
+        }
+        else if (base == 8 && !(digit >= '0' && digit <= '7')) {
+            return false;
+        }
+        else if (base == 10 && !(digit >= '0' && digit <= '9')) {
+            return false;
+        }
+        else if (base == 16 && !((digit >= '0' && digit <= '9') || (digit >= 'a' && digit <= 'f') || (digit >= 'A' && digit <= 'F'))) {
             return false;
         }
     }
@@ -51,11 +74,14 @@ bool isnumber(char *str) {
 }
 
 
-int16_t tonumber(char *str) {
+int8_t tonumber(char *str) {
     assert(str != NULL);
-    assert(isnumber(str));
+    if (! isnumber(str)) {
+        fprintf(stderr, "%s is not a number\n", str);
+        assert(false);
+    }
 
-    int16_t num = 0;
+    int8_t num = 0;
     uint8_t base = 10;
     bool is_positive = true;
 
@@ -63,6 +89,11 @@ int16_t tonumber(char *str) {
 
     // binary, octal, decimal or hexadecimal
     if (str[i] == 'b' || str[i] == 'o' || str[i] == 'd' || str[i] == 'h') {
+        if (str[i] == 'b') base = 2;
+        else if (str[i] == 'o') base = 8;
+        else if (str[i] == 'd') base = 10;
+        else if (str[i] == 'h') base = 16;
+
         i++;
     }
 
@@ -83,10 +114,10 @@ int16_t tonumber(char *str) {
             value = c - '0';
         }
         else if (c >= 'a' && c <= 'f') {
-            value = c - 'a';
+            value = c - 'a' + 10;
         }
         else if (c >= 'A' && c <= 'F') {
-            value = c - 'A';
+            value = c - 'A' + 10;
         }
         else {
             fprintf(stderr, "Failed to convert number: invalid base %u for char %c\n", base, c);
@@ -179,11 +210,15 @@ int compile(int argc, char *argv[]) {
         if (0) {}
         cmp(cmd, "mov", MOV);
         cmp(cmd, "add", ADD);
+        cmp(cmd, "sub", SUB);
         cmp(cmd, "mul", MUL);
+        cmp(cmd, "sq", SQ);
+        cmp(cmd, "inc", INC);
         cmp(cmd, "debug", DEBUG);
 
         else {
             fprintf(stderr, "Failed to convert token `%s`\n", cmd);
+            exit(1);
         }
 
         printf("%02x ", bitcode);
@@ -191,6 +226,8 @@ int compile(int argc, char *argv[]) {
 
 
         for (size_t i=1; i < amount_tokens; i++) {
+            uint8_t type = REG;
+
             token = tokens[i];
             bitcode = 0;
 
@@ -201,6 +238,7 @@ int compile(int argc, char *argv[]) {
             cmp(token, "regd", REGD);
 
             else if (isnumber(token)) {
+                type = BYTE;
                 bitcode = (uint8_t) tonumber(token);
             }
             else if (strlen(token) == 0) {
@@ -209,10 +247,12 @@ int compile(int argc, char *argv[]) {
             }
             else {
                 fprintf(stderr, "Failed to convert token `%s`\n", token);
+                exit(1);
             }
 
 
-            printf("%02x ", bitcode);
+            printf("%04x ", type << 8 | bitcode);
+            fwrite(&type, 1, sizeof(type), output_file);
             fwrite(&bitcode, 1, sizeof(bitcode), output_file);
         }
 
@@ -238,11 +278,10 @@ int run(int argc, char *argv[]) {
     char *input_filename = argv[1];
     FILE *input_file = fopen(input_filename, "rb");
 
-    // 0-512: instructions
     char stack[1024];
-    size_t stack_amount=0;
+    size_t stack_amount = 0;
 
-    char regs[4];
+    char regs[4] = {0, 0, 0, 0};
 
     char c;
     while ((c = (char) fgetc(input_file)) != EOF) {
@@ -251,81 +290,168 @@ int run(int argc, char *argv[]) {
 
     fclose(input_file);
 
+    #define get_dest(dest, loc) \
+        switch (loc) { \
+            case REGA: \
+                dest = &regs[0]; \
+                break; \
+            case REGB: \
+                dest = &regs[1]; \
+                break; \
+            case REGC: \
+                dest = &regs[2]; \
+                break; \
+            case REGD: \
+                dest = &regs[3]; \
+                break; \
+            default: \
+                fprintf(stderr, "Unable to find destination"); \
+                exit(1); \
+        }
 
     size_t ip = 0;
 
     while (ip < stack_amount) {
         char cmd = stack[ip];
 
-        #define get_dest(dest, loc) \
-            switch (loc) { \
-                case REGA: \
-                    dest = &regs[0]; \
-                    break; \
-                case REGB: \
-                    dest = &regs[1]; \
-                    break; \
-                case REGC: \
-                    dest = &regs[2]; \
-                    break; \
-                case REGD: \
-                    dest = &regs[3]; \
-                    break; \
-                default: \
-                    fprintf(stderr, "No idea which variable to add"); \
-                    continue; \
-            }
-
-
         if (cmd == MOV) {
-            char args[] = { stack[ip+1], stack[ip+2] };
-            ip += 2;
+            char args[] = { stack[ip+1], stack[ip+2], stack[ip+3], stack[ip+4] };
+            ip += 4;
 
             char *dest;
-            get_dest(dest, args[0]);
+            assert(args[0] == REG && "First argument to MOV has to be register");
+            get_dest(dest, args[1]);
 
-            *dest = args[1];
+            if (args[2] == REG) {
+                char *from;
+                get_dest(from, args[3]);
+
+                *dest = *from;
+            }
+            else if (args[2] == BYTE) {
+                *dest = args[3];
+            }
+            else {
+                fprintf(stderr, "Unknown type");
+                exit(1);
+            }
         }
 
         else if (cmd == ADD) {
-            char args[] = { stack[ip+1], stack[ip+2] };
-            ip += 2;
+            char args[] = { stack[ip+1], stack[ip+2], stack[ip+3], stack[ip+4] };
+            ip += 4;
 
             char *dest;
-            get_dest(dest, args[0]);
+            assert(args[0] == REG && "First argument to ADD has to be register");
+            get_dest(dest, args[1]);
 
-            *dest += args[1];
+            if (args[2] == REG) {
+                char *from;
+                get_dest(from, args[3]);
+
+                *dest += *from;
+            }
+            else if (args[2] == BYTE) {
+                *dest += args[3];
+            }
+            else {
+                fprintf(stderr, "Unknown type");
+                exit(1);
+            }
+        }
+
+        else if (cmd == SUB) {
+            char args[] = { stack[ip+1], stack[ip+2], stack[ip+3], stack[ip+4] };
+            ip += 4;
+
+            char *dest;
+            assert(args[0] == REG && "First argument to SUB has to be register");
+            get_dest(dest, args[1]);
+
+            if (args[2] == REG) {
+                char *from;
+                get_dest(from, args[3]);
+
+                *dest -= *from;
+            }
+            else if (args[2] == BYTE) {
+                *dest -= args[3];
+            }
+            else {
+                fprintf(stderr, "Unknown type");
+                exit(1);
+            }
         }
 
         else if (cmd == MUL) {
+            char args[] = { stack[ip+1], stack[ip+2], stack[ip+3], stack[ip+4] };
+            ip += 4;
+
+            char *dest;
+            assert(args[0] == REG && "First argument to MUL has to be register");
+            get_dest(dest, args[1]);
+
+            if (args[2] == REG) {
+                char *from;
+                get_dest(from, args[3]);
+
+                *dest *= *from;
+            }
+            else if (args[2] == BYTE) {
+                *dest *= args[3];
+            }
+            else {
+                fprintf(stderr, "Unknown type");
+                exit(1);
+            }
+        }
+
+        else if (cmd == SQ) {
             char args[] = { stack[ip+1], stack[ip+2] };
             ip += 2;
 
             char *dest;
-            get_dest(dest, args[0]);
+            assert(args[0] == REG && "First argument to SQ has to be register");
+            get_dest(dest, args[1]);
 
-            *dest *= args[1];
+            *dest *= *dest;
+        }
+
+        else if (cmd == INC) {
+            char args[] = { stack[ip+1], stack[ip+2] };
+            ip += 2;
+
+            char *dest;
+            assert(args[0] == REG && "First argument to INC has to be register");
+            get_dest(dest, args[1]);
+
+            *dest += 1;
         }
 
         else if (cmd == DEBUG) {
-            char args[] = { stack[ip+1] };
-            ip += 1;
+            char args[] = { stack[ip+1], stack[ip+2] };
+            ip += 2;
 
-            char *dest;
-            get_dest(dest, args[0]);
+            if (args[0] == REG) {
+                char *dest;
+                get_dest(dest, args[1]);
 
-            if (args[0] >= REGA && args[0] <= REGD) {
-                char regc = args[0] - REGA + 'A';
+                char regc = args[1] - REGA + 'A';
 
                 printf("REG%c %i\n", regc, *dest);
             }
+            else if (args[1] == BYTE) {
+                printf("0x%04x\n", args[1]);
+            }
             else {
-                printf("%x %i\n", args[0], *dest);
+                fprintf(stderr, "Unknown type while debugging");
+                exit(1);
             }
         }
 
         else {
             fprintf(stderr, "Failed to exec cmd %x\n", cmd);
+            exit(1);
         }
 
         ip++;
@@ -336,9 +462,24 @@ int run(int argc, char *argv[]) {
 }
 
 
+void test() {
+    assert(tonumber("b10") == 0b10);
+    assert(tonumber("o10") == 010);
+    assert(tonumber("d-10") == -10);
+    assert(tonumber("h10") == 0x10);
+
+    assert(tonumber("h09") == 0x09);
+    assert(tonumber("h7f") == 0x7f);
+    assert(tonumber("b101010") == 0b101010);
+    assert(tonumber("o76") == 076);
+}
+
+
 
 
 int main(int argc, char *argv[]) {
+    test();
+
     #ifdef RUN
         return run(argc, argv);
     #else

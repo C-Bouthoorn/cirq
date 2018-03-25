@@ -154,7 +154,7 @@ $(OUTPUT_EXEC): $(DEPS_O)
 	@$(CC)  $(CFLAGS) $(IGNORE_FLAGS) $(DEPS_O) -o $(OUTPUT_EXEC)
 
 
-COMPILERFLAGS = -O0 -g -Weverything -Wno-missing-prototypes -Wno-missing-variable-declarations -Wno-gnu-folding-constant -fsanitize=address
+COMPILERFLAGS = -O0 -g -Weverything -Wno-missing-prototypes -Wno-missing-variable-declarations -Wno-gnu-folding-constant -Wno-gnu-binary-literal -fsanitize=address
 
 compiler/main.o: compiler/main.c
 	@mkdir -p build/_compiler
