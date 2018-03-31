@@ -7,7 +7,7 @@
 #include "vector.h"
 
 
-#define double_time(time) ((long) 1e9 * (long) time.tv_sec + (long) time.tv_nsec)
+#define long_time(time) ((long) 1e9 * (long) time.tv_sec + (long) time.tv_nsec)
 
 
 #ifdef BENCH

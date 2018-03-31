@@ -23,14 +23,14 @@ void bench_prepare(void) {
 void bench_write_states(void) {
 	FILE *outfile = fopen(bench_file_name, "w+");
 
-
+	benchmark_state_t *state;
 	for (size_t i=0; i < bench_state_index && bench_state_index != BENCH_STATE_SIZE; i++) {
-		benchmark_state_t *state = &BENCH_STATE[i];
+		state = &BENCH_STATE[i];
 
 		double frac = state->effective_time / state->amount;
 
 		fprintf(outfile, "%s\t%s = %s / %i \t%s \t%s\n",
-			LEFT_PAD_SPACE(state->amount, 3),
+			LEFT_PAD_SPACE(frac, 8),
 
 			LEFT_PAD_SPACE(frac, 8),
 			LEFT_PAD_SPACE(state->effective_time, 8),
@@ -53,8 +53,9 @@ void benchmark_state_init(benchmark_state_t *state) {
 
 
 benchmark_state_t *bench_get_or_create_state_by_name(const char func_name[]) {
+	benchmark_state_t *state;
 	for (size_t i=0; i < bench_state_index && bench_state_index != BENCH_STATE_SIZE; i++) {
-		benchmark_state_t *state = &BENCH_STATE[i];
+		state = &BENCH_STATE[i];
 
 		if (strcmp(state->func_name, func_name) == 0) {
 			return state;
@@ -65,7 +66,7 @@ benchmark_state_t *bench_get_or_create_state_by_name(const char func_name[]) {
 	bool is_initial = bench_state_index == BENCH_STATE_SIZE;
 
 	// No existing data found, so create a new one
-	benchmark_state_t *state = &BENCH_STATE[is_initial ? 0 : bench_state_index];
+	state = &BENCH_STATE[is_initial ? 0 : bench_state_index];
 	benchmark_state_init(state);
 	state->func_name = func_name;
 
@@ -93,8 +94,8 @@ void bench_apply_endtime(benchmark_state_t *state, struct timespec end) {
 	assert_not_null(state);
 
 
-	long effective_duration = double_time(end) - double_time(state->effective_start);
-	long actual_duration = double_time(end) - double_time(state->actual_start);
+	long effective_duration = long_time(end) - long_time(state->effective_start);
+	long actual_duration = long_time(end) - long_time(state->actual_start);
 
 	state->effective_time += effective_duration;
 	state->actual_time = actual_duration;

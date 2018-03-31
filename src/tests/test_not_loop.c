@@ -1,6 +1,6 @@
-#include "read_template.h"
-#include "test.h"
-#include "benchmark.h"
+#include "../read_template.h"
+#include "../test.h"
+#include "../benchmark.h"
 
 
 test_result_t test_not_loop(void) {

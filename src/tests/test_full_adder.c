@@ -1,6 +1,6 @@
-#include "read_template.h"
-#include "test.h"
-#include "benchmark.h"
+#include "../read_template.h"
+#include "../test.h"
+#include "../benchmark.h"
 
 
 #if DEBUG_ON

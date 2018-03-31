@@ -116,7 +116,8 @@ run:
 # Clean all build files
 clean:
 	@echo "${RED}rm -f $(OUTPUT_EXEC) build/*${RESET}"
-	@rm -f $(OUTPUT_EXEC) build/*
+	@rm -rf $(OUTPUT_EXEC) build/*
+	@mkdir -p build/tests
 
 
 # Remove all files, then build again

@@ -89,12 +89,17 @@ bool read_template(char *filename, circuit_t *circ, vector_t *dependencies) {
 	}
 
 
-	for (size_t i = 0; i < amount_wires; i++) {
-		char *leftuuid = malloc(BUF_SIZE);
-		char *leftport = malloc(BUF_SIZE);
-		char *rightuuid = malloc(BUF_SIZE);
-		char *rightport = malloc(BUF_SIZE);
+	// Create new wire
+	wire_t *w = malloc(sizeof(wire_t));
+	wire_init(w);
 
+	char *leftuuid = malloc(BUF_SIZE);
+	char *leftport = malloc(BUF_SIZE);
+	char *rightuuid = malloc(BUF_SIZE);
+	char *rightport = malloc(BUF_SIZE);
+
+
+	for (size_t i = 0; i < amount_wires; i++) {
 		// example:  da2ecd25:O0 eec2fc01:I0
 		int x = fscanf(file, "%[a-f0-9]:%s %[a-f0-9]:%s\n", leftuuid, leftport, rightuuid, rightport);
 
@@ -105,10 +110,6 @@ bool read_template(char *filename, circuit_t *circ, vector_t *dependencies) {
 			return false;
 		}
 
-		// Create new wire
-		wire_t *w = malloc(sizeof(wire_t));
-		wire_init(w);
-
 		w->leftuuid = leftuuid;
 		w->leftport = leftport;
 		w->rightuuid = rightuuid;
@@ -116,11 +117,11 @@ bool read_template(char *filename, circuit_t *circ, vector_t *dependencies) {
 
 		// Apply wire to circuit
 		success &= circuit_apply_wire(circ, w);
-
-		// Free wire again
-		wire_free(w);
-		free(w);
 	}
+
+	// Free wire
+	wire_free(w);
+	free(w);
 
 	// Close template file
 	fclose(file);
