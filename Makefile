@@ -117,7 +117,7 @@ run:
 clean:
 	@echo "${RED}rm -f $(OUTPUT_EXEC) build/*${RESET}"
 	@rm -rf $(OUTPUT_EXEC) build/*
-	@mkdir build/tests
+	@mkdir -p build/tests
 
 
 # Remove all files, then build again
@@ -152,18 +152,3 @@ $(OUTPUT_EXEC): $(DEPS_O)
 	@echo "${TAB}${LIGHT_MAGENTA}-o $(OUTPUT_EXEC)"
 	@echo "${RESET}"
 	@$(CC)  $(CFLAGS) $(IGNORE_FLAGS) $(DEPS_O) -o $(OUTPUT_EXEC)
-
-
-COMPILERFLAGS = -O0 -g -Weverything -Wno-missing-prototypes -Wno-missing-variable-declarations -Wno-gnu-folding-constant -Wno-gnu-binary-literal -fsanitize=address
-
-compiler/main.o: compiler/main.c
-	@mkdir -p build/_compiler
-	clang $(COMPILERFLAGS) -c compiler/main.c -o build/_compiler/main.o
-
-compiler/main: compiler/main.o
-	clang $(COMPILERFLAGS) build/_compiler/main.o -o build/compiler
-
-compiler: compiler/main
-
-compiler_run: COMPILERFLAGS += -DRUN
-compiler_run: compiler
