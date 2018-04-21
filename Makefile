@@ -1,5 +1,6 @@
 # The path of the executable
 OUTPUT_EXEC = build/main
+OUTPUT_LIB = build/libcirq.a
 
 # Use clang by default
 CC = clang
@@ -37,10 +38,12 @@ DARK_GRAY := $(shell echo -ne "\e[0;90m")
 BLACK := $(shell echo -ne "\e[0;30m")
 RESET := $(shell echo -ne "\e[0m")
 
+BOLD := $(shell echo -ne "\e[1m")
+
 TAB := $(shell echo -ne "\t")
 
 # All targets that are not files
-.PHONY: help asan all shit release bench bench_rel bench_build valgrind valshit run clean remake cleanrun
+.PHONY: help asan all shit release bench bench_rel bench_build valgrind valshit run clean remake cleanrun archive
 
 
 # Show some help
@@ -57,6 +60,7 @@ help:
 	@echo "make clean     remove all build files"
 	@echo "make remake    same as make clean; make all"
 	@echo "make cleanrun  same as make remake, but runs formed executable directly after"
+	@echo "make archive   compile into static library"
 
 
 # ASAN
@@ -129,26 +133,43 @@ cleanrun: remake
 	@echo -e "\n\n"
 	$(OUTPUT_EXEC)
 
+archive: $(OUTPUT_LIB)
+
 
 # Find all C files
-DEPS = $(shell find src -name '*.c')
+C_FILES = $(shell find src -iname '*.c')
+C_FILES_O = $(C_FILES:src/%.c=build/%.o)
 
-# Change src/%.c to build/%.o
-DEPS_O = $(DEPS:src/%.c=build/%.o)
-
-
-# Build dependencies
-$(DEPS_O): build/%.o: src/%.c
-	@echo "$(CC)${TAB}${YELLOW}$(CFLAGS) ${DARK_GRAY}$(IGNORE_FLAGS)"
+# Build C files
+$(C_FILES_O): build/%.o: src/%.c
+	@echo "${BOLD}$(CC)${RESET}${TAB}${LIGHT_YELLOW}$(CFLAGS)"
+	@echo "${TAB}${DARK_GRAY}$(IGNORE_FLAGS)"
 	@echo "${TAB}${LIGHT_CYAN}-c" $< "${TAB}${LIGHT_GREEN}-o" $@
 	@echo "${RESET}"
 	@$(CC)  $(CFLAGS) $(IGNORE_FLAGS) -c $< -o $@
 
 
+# Find all header files
+HEADER_FILES = $(shell find src -iname '*.h')
+HEADER_FILES_O = $(HEADER_FILES:src/%.h=build/%.o)
+
+# Add header files to c object
+$(HEADER_FILES_O): build/%.o: src/%.h
+
+
 # Build main executable
-$(OUTPUT_EXEC): $(DEPS_O)
-	@echo "$(CC)${TAB}${YELLOW}$(CFLAGS) ${DARK_GRAY}$(IGNORE_FLAGS)"
-	@echo "${TAB}${LIGHT_GREEN}$(DEPS_O)"
-	@echo "${TAB}${LIGHT_MAGENTA}-o $(OUTPUT_EXEC)"
+$(OUTPUT_EXEC): $(C_FILES_O) $(HEADER_FILES)
+	@echo "${BOLD}$(CC)${RESET}${TAB}${LIGHT_YELLOW}$(CFLAGS)"
+	@echo "${TAB}${DARK_GRAY}$(IGNORE_FLAGS)"
+	@echo "${TAB}${LIGHT_GREEN}$(C_FILES_O)"
+	@echo "${TAB}${LIGHT_BLUE}-o $(OUTPUT_EXEC)"
 	@echo "${RESET}"
-	@$(CC)  $(CFLAGS) $(IGNORE_FLAGS) $(DEPS_O) -o $(OUTPUT_EXEC)
+	@$(CC)  $(CFLAGS) $(IGNORE_FLAGS) $(C_FILES_O) -o $(OUTPUT_EXEC)
+
+
+$(OUTPUT_LIB): $(C_FILES_O)
+	@echo "${RED}rm -f build/main.o${RESET}"
+	@rm -f build/main.o
+
+	@echo "${BOLD}ar${RESET} ${TAB}${LIGHT_YELLOW}rcs ${TAB}${LIGHT_MAGENTA}build/libcirq.a ${TAB}${LIGHT_GREEN}build/*.o${RESET}"
+	@ar rcs build/libcirq.a build/*.o

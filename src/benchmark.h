@@ -13,9 +13,13 @@
 #ifdef BENCH
 	#define FUNC_START()  bench_start_func(__FUNCTION__);
 	#define FUNC_END()  bench_end_func(__FUNCTION__);
+
+	#define BENCH_ON()   bench_prepare();  atexit(bench_write_states);
 #else
 	#define FUNC_START()
 	#define FUNC_END()
+
+	#define BENCH_ON()
 #endif
 
 
