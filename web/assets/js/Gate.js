@@ -1,117 +1,140 @@
-/* global Port, guid, LOOP_OBJ, define */
+/* global Component, loop, define, Port */
 
 
-window._gates = {};
-
-
-function Gate(type, _in, _out) {
-    this.type = type;
-    this.in = _in;
-    this.out = _out;
-
-    this.uuid = guid();
-    this.ports = { };
-
-    // Always 1 extra spot for the color to show
-    let amount_ports = _in + _out + 1;
-
-    // Calculate dimensions
-    this.portsPerWidth = Math.ceil(Math.sqrt(amount_ports));
-    this.PORT_WIDTH = window.GATE_WIDTH / this.portsPerWidth;
-
-    // Add in-ports
-    for (let i=0; i < _in; i++) {
-        // Default name
-        let name = 'I' + i;
-        this.ports[name] = new Port(this, i, Port.TYPE_ENUM.IN, name, this.PORT_WIDTH);
+class Gate extends Component {
+    static get struct() {
+        return {
+            uuid: /*uuid*/ 'string',
+            type: 'string',
+            color: 'string',
+            ports: ['object', Port.struct],
+        };
     }
 
-    // Add out-ports
-    for (let i=0; i < _out; i++) {
-        // Default name
-        let name = 'O' + i;
-        this.ports[name] = new Port(this, i, Port.TYPE_ENUM.OUT, name, this.PORT_WIDTH);
+    static get className() {
+        return 'js-gate';
     }
 
-    window._gates[this.uuid] = this;
+    static get WIDTH() { return 100; }
+    static get HEIGHT() { return 100; }
+
+
+    /**
+     * Move to the location of the given event.
+     */
+    move(event) {
+        if (! this.__element) throw new Error("Can't move without element");
+
+        let x = event.clientX - this.constructor.WIDTH / 2;
+        let y = event.clientY - this.constructor.HEIGHT / 2;
+
+        this.element.style.left = x + 'px';
+        this.element.style.top = y + 'px';
+    }
+
+
+    setPorts(/*number*/ inports, /*number*/ outports) /*void*/ {
+        // Make sure there are no ports already set
+        if (loop(this.ports).length() !== 0) {
+            throw new Error("Can't overwrite ports");
+        }
+
+        // Add `inports` in-ports
+        for (let i=0; i < inports; i++) {
+            let port = new Port('in', 'I' + i);
+            this.ports[port.uuid] = port;
+        }
+
+        // Add `outports` out-ports
+        for (let i=0; i < outports; i++) {
+            let port = new Port('out', 'O' + i);
+            this.ports[port.uuid] = port;
+        }
+    }
+
+
+    constructor(/*string*/ type) {
+        super();
+
+        this.type = type;
+        this.ports = {};
+    }
+
+
+    toJSON(silent = true) /*object|null*/ {
+        if (! this.color && ! silent) this.color = prompt("Color for Gate " + this.uuid + " ?");
+
+        if (! this.color) return null;
+
+        return this.forceValid({
+            uuid: this.uuid,
+            type: this.type,
+            color: this.color,
+            ports: loop(this.ports).map((port) => port.toJSON(silent)).obj(),
+        });
+    }
+
+
+    static fromJSON(/*object*/ json) /*Self*/ {
+        this.forceValid(json);
+
+        let gate = new Gate;
+        gate.uuid = json.uuid;
+        gate.type = json.type;
+        gate.color = json.color;
+        gate.ports = loop(json.ports).map((portjson) => Port.fromJSON(portjson)).obj();
+        return gate;
+    }
+
+
+    get element() /*DOMElement*/ {
+        let elem = super.element;
+
+        if (elem.jsFresh) {
+            elem.draggable = true;
+
+            elem.dataset.type = this.type;
+
+            elem.style.backgroundColor = this.color;
+        }
+
+        return elem;
+    }
+
+
+    render(/*Component*/ parent) /*DOMElement*/ {
+        // Get own DOMElement
+        let self = super.render(parent);
+
+        // Determine width of the ports
+        let portsPerWidth = Math.ceil(Math.sqrt(
+            loop(this.ports).length() + 1 /* for the remaining colour*/
+        ));
+        let portWidth = Gate.WIDTH / portsPerWidth;
+
+        // Attach and render all children
+        loop(this.ports).forEach((port) => {
+            this.attachComponent(port);
+            port.render(this);
+            port.width = portWidth;
+        });
+
+        return self;
+    }
+
+
+    destroy() /*void*/ {
+        console.log("destroy", this);
+
+        super.destroy();
+
+        // Destroy all children
+        loop(this.ports).forEach((port) => {
+            this.detachComponent(port);
+            port.destroy();
+        });
+    }
 }
-
-
-Gate.prototype.setBgColor = function(bgColor) {
-    this.bgColor = bgColor;
-};
-
-
-Gate.prototype.getElement = function() {
-    if (this.gateElem) return this.gateElem;
-
-    let gateElem = document.createElement('div');
-
-    gateElem.uuid = this.uuid;
-    gateElem.className = 'gate gate-' + this.type;
-
-    if (this.bgColor) gateElem.style.backgroundColor = this.bgColor;
-
-    gateElem.draggable = true;
-    gateElem.dataset.type = this.type;
-    gateElem.dataset.clone = false;
-
-
-    // Add port elements
-    LOOP_OBJ(this.ports).forEach((name, port) => {
-        let portElem = port.getElement();
-
-        gateElem.appendChild(portElem);
-    });
-
-
-    this.gateElem = gateElem;
-    return gateElem;
-};
-
-
-Gate.prototype.draw = function(circuitElem) {
-    let gateElem = this.getElement();
-    circuitElem.appendChild(gateElem);
-};
-
-
-Gate.prototype.setPosition = function(x, y) {
-    let gateElem = this.getElement();
-
-    // Set position
-    gateElem.style.left = x + 'px';
-    gateElem.style.top = y + 'px';
-
-    // Set coordinates
-    gateElem.x = x;
-    gateElem.y = y;
-
-    // Move ports
-    LOOP_OBJ(this.ports).forEach((name, port) => {
-        let portX = x;
-        let portY = y;
-
-        portX += (port.id % this.portsPerWidth) * this.PORT_WIDTH;
-        portY += Math.floor(port.id / this.portsPerWidth) * this.PORT_WIDTH;
-
-        port.setPosition(portX, portY);
-    });
-}
-
-
-Gate.prototype.destroy = function() {
-    // Remove element
-    if (this.gateElem) this.gateElem.parentNode.removeChild(this.gateElem);
-
-    // Destroy ports
-    LOOP_OBJ(this.ports).forEach((name, port) => {
-        port.destroy();
-    });
-
-    // Remove from global gates list
-    delete window._gates[this.uuid];
-};
 
 
 define(() => Gate);

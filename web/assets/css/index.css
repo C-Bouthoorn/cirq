@@ -7,10 +7,8 @@ html, body {
 
 
 html {
-    background-color: #2a130d;
-
+    background-color: #132a0d;
     font-family: monospace;
-    text-transform: uppercase;
 }
 
 
@@ -26,7 +24,8 @@ h1, h2, h3, h4, h5, h6 {
     width: calc(15% - 2 * 20px - 4px);
     height: calc(100% - 2 * 10px);
 
-    background-color: rgba(0, 0, 0, .8);
+    background-color: #000;
+    background-color: rgba(0, 0, 0, .5);
     color: #fff;
 
     padding-top: 10px;
@@ -39,6 +38,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .toolbox .box {
     float: right;
+
     width: calc(100% - 2 * 10px);
 
     padding-top: 5px;
@@ -49,12 +49,14 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 10px;
 }
 
-.toolbox .box .gate {
+.toolbox .box .js-gate {
     float: left;
+
     margin: 10px;
 }
 
-.toolbox .box .gate[draggable=true] {
+
+.js-gate[draggable=true] {
     cursor: move;
 }
 
@@ -66,25 +68,35 @@ h1, h2, h3, h4, h5, h6 {
     height: 100%;
 }
 
-#circuit .gate {
-    position: fixed;
+.js-circuit {
+    width: 100%;
+    height: 100%;
 }
 
-#circuit .gate .port {
+
+.js-circuit .js-gate {
     position: fixed;
+    width: 100px;
+    height: 100px;
 }
 
-#circuit .gate .port.port-IN {
+.js-circuit .js-gate .js-port {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+}
+
+.js-circuit .js-gate .js-port[data-type=in] {
     background-color: #fff;
     color: #000;
 }
 
-#circuit .gate .port.port-OUT {
+.js-circuit .js-gate .js-port[data-type=out] {
     background-color: #000;
     color: #fff;
 }
 
-#circuit .wire {
+.js-circuit .js-wire {
     width: 0;
     position: fixed;
 
@@ -94,34 +106,33 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
-.gate {
-    width: 75px;
-    height: 75px;
-
-    border: 3px solid #999;
+.js-gate {
+    width: 50px;
+    height: 50px;
 }
 
-.gate.gate-AND {
+.js-gate[data-type=and] {
     background-color: #500;
 }
 
-.gate.gate-OR {
+.js-gate[data-type=or] {
     background-color: #005;
 }
 
-.gate.gate-XOR {
+.js-gate[data-type=xor] {
     background-color: #055;
 }
 
-.gate.gate-NOT {
+.js-gate[data-type=not] {
     background-color: #505;
 }
 
-.gate.gate-IN {
+.js-gate[data-type=in] {
     color: #000;
     background-color: #fff;
 }
 
-.gate.gate-OUT {
+.js-gate[data-type=out] {
+    color: #fff;
     background-color: #000;
 }

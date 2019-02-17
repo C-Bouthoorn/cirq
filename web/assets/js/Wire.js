@@ -1,124 +1,100 @@
-/* global calculateLength, calculateRadians, define */
+/* global Component, loop, define, Port */
 
 
-window._wires = [];
-
-
-function Wire(a, b) {
-    this.a = a;
-    this.b = b;
-
-    // TODO: Check if this can be removed
-    this.uuid = 'wire#' + a.uuid + '/' + b.uuid;
-
-    window._wires.push(this);
-}
-
-
-Wire.prototype.getElement = function() {
-    if (this.wireElem) return this.wireElem;
-
-    let wireElem = document.createElement('div');
-
-    wireElem.uuid = this.uuid;
-    wireElem.className = 'wire';
-
-    wireElem.addEventListener('click', this.clicked.bind(this));
-
-    this.wireElem = wireElem;
-
-    this.applyElement();
-
-    return wireElem;
-};
-
-
-Wire.prototype.clicked = function(event) {
-    if (event.ctrlKey) {
-        this.destroy();
-    }
-};
-
-
-Wire.prototype.applyElement = function() {
-    // a should always be left from b
-    if (this.a.x > this.b.x) {
-        // swap a and b
-        let _ = this.b;
-        this.b = this.a;
-        this.a = _;
+class Wire extends Component {
+    static get struct() /*object*/ {
+        return {
+            uuid: /*uuid*/ 'string',
+            from: /*uuid*/ 'string',
+            to:   /*uuid*/ 'string',
+        };
     }
 
-    // Process gate coordinates
-    let ax = this.a.x,
-    ay = this.a.y,
-    bx = this.b.x,
-    by = this.b.y;
-
-    // Check coordinates
-    if (isNaN(ax + ay + bx + by)) {
-        console.error("Failed to create wire: invalid coordinates", ax, ay, bx, by);
-        return;
+    static get className() /*string*/ {
+        return 'js-wire';
     }
 
-    // Convert top left to center coordinates
-    ax += this.a.port_width / 2;
-    ay += this.a.port_width / 2;
-    bx += this.b.port_width / 2;
-    by += this.b.port_width / 2;
+
+    click(event) /*void*/ {
+        console.log(event);
+
+        alert(this.from + " <-> " + this.to + " clicked");
+    }
 
 
-    // Calculate length
-    let length = calculateLength(ax, ay, bx, by);
+    constructor(/*DOMElement|uuid|Port*/ from, /*DOMElement|uuid|Port*/ to) /*void*/ {
+        super();
 
-    this.wireElem.style.height = length + 'px';
+        // Get UUID from `from`
+        if (from instanceof Port) from = from.uuid;
+        else if (from instanceof Element) from = from.dataset.uuid;
+        if (typeof from !== 'string') throw new TypeError("Couldn't get UUID from `from`");
 
+        // Get UUID from `to`
+        if (from instanceof Port) to = to.uuid;
+        else if (to instanceof Element) to = to.dataset.uuid;
+        if (typeof to !== 'string') throw new TypeError("Couldn't get UUID from `to`");
 
-    // Calculate position
-    let x = ax + window.WIRE_WIDTH / 2,
-    y = ay + window.WIRE_WIDTH / 2;
-
-    this.wireElem.style.left = x + 'px';
-    this.wireElem.style.top = y + 'px';
-
-
-    // Calculate rotation
-    let rotation = calculateRadians(ax, ay, bx, by) - Math.PI / 2;
-
-    this.wireElem.style.transform = 'rotate(' + rotation + 'rad)';
-    this.wireElem.style.transformOrigin = 'top left';
-}
+        this.from = from;
+        this.to = to;
+    }
 
 
-Wire.prototype.draw = function(circuitElem) {
-    circuitElem.appendChild(this.getElement());
-};
+    toJSON(/*boolean*/ silent = true) /*object|null*/ {
+        /*unused*/ silent;
+
+        return this.forceValid({
+            uuid: this.uuid,
+            from: this.from,
+            to: this.to,
+        });
+    }
 
 
-Wire.prototype.destroy = function() {
-    if (this.wireElem) this.wireElem.parentNode.removeChild(this.wireElem);
+    static fromJSON(/*object*/ json) /*Self*/ {
+        this.forceValid(json);
 
-    // Remove from global wires list
-    let uuid = this.uuid;
-    // NOTE: `delete` leaves an empty spot in the array, so filter it
-    window._wires = window._wires.filter(wire => wire.uuid != uuid);
-};
-
-
-Wire.prototype.redraw = function(circuitElem) {
-    if (! this.wireElem) this.getElement();
-
-    this.applyElement();
-    this.draw(circuitElem);
-};
+        let wire = new Wire;
+        wire.uuid = json.uuid;
+        wire.from = json.from;
+        wire.to = json.to;
+        return wire;
+    }
 
 
-function redrawAllWires() {
-    let circuitElem = document.getElementById('circuit');
+    get element() /*DOMElement*/ {
+        let elem = super.element;
 
-    window._wires.forEach(wire => {
-        wire.redraw(circuitElem);
-    });
+        if (elem.jsFresh) {
+            elem.addEventListener('click', this.click.bind(this));
+        }
+
+        return elem;
+    }
+
+
+    render(/*Component*/ parent) /*DOMElement*/ {
+        // Get own DOMElement
+        let self = super.render(parent);
+
+        // Attach and render all children
+        loop(this.ports).forEach((port) => {
+            self.attachElement(port);
+            port.render(this);
+        });
+
+        self.innerHTML = this.name;
+
+        return self;
+    }
+
+
+    destroy() /*void*/ {
+        super.destroy();
+
+        // Destroy all children
+        loop(this.ports).forEach((port) => port.destroy());
+    }
 }
 
 

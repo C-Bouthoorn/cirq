@@ -8,46 +8,28 @@ require.config({
             deps: [ ]
         },
 
-        Template: {
-            deps: [ 'utils' ],
-            exports: 'Template',
-        },
-
         Circuit: {
-            deps: [ 'utils' ],
+            deps: [ 'utils', 'Component', 'Gate', 'Wire', 'Port' ],
             exports: 'Circuit',
         },
 
+        Gate: {
+            deps: [ 'utils', 'Component', 'Port' ],
+            exports: 'Gate',
+        },
+
         Wire: {
-            deps: [ 'utils' ],
+            deps: [ 'utils', 'Component', 'Port' ],
             exports: 'Wire',
         },
 
         Port: {
-            deps: [ 'Wire' ],
+            deps: [ 'utils', 'Component' ],
             exports: 'Port',
         },
 
-        CustomGate: {
-            deps: [ 'utils', 'Template' ],
-            exports: 'CustomGate',
-        },
-
-        Gate: {
-            deps: [ 'Port', 'utils' ],
-            exports: 'Gate',
-        },
-
-        wireEvents: {
-            deps: [ 'Wire' ],
-        },
-
-        dragAndDropEvents: {
-            deps: [ 'Gate', 'Wire', 'Port', 'utils' ],
-        },
-
         indexx: {
-            deps: [ 'dragAndDropEvents', 'wireEvents', 'Circuit', 'CustomGate', 'utils', 'Wire', 'Gate' ],
+            deps: [ 'utils', 'eventDragAndDrop', 'Circuit' ],
         },
     },
 });

@@ -16,9 +16,9 @@ test_result_t test_xor(void) {
 	assert_true(read_template("tests/xor", circ, NULL));
 
 	// Get all I/O gates
-	port_t *i0 = circuit_get_port_by_name(circ, "5cf6cdaa", "I0");
-	port_t *i1 = circuit_get_port_by_name(circ, "3958dd83", "I1");
-	port_t *o0 = circuit_get_port_by_name(circ, "961b5519", "O0");
+	port_t *i0 = circuit_get_port_by_name(circ, "a4e440cf", "I0");
+	port_t *i1 = circuit_get_port_by_name(circ, "4cdc5dc2", "I1");
+	port_t *o0 = circuit_get_port_by_name(circ, "5561df73", "O0");
 
 	// Make sure we got them
 	assert_not_null(i0);
